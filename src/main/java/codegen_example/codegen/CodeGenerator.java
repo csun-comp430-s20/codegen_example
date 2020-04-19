@@ -222,12 +222,12 @@ public class CodeGenerator {
     } // makeProgram
     
     public static void main(final String[] args) throws CodeGeneratorException, IOException {
-        // int x = 5;
+        // int x = 2147483647;
         // print(x);
         final Program program =
             makeProgram(new VariableDeclarationStmt(new IntType(),
                                                     new Variable("x"),
-                                                    new IntegerLiteralExp(5)),
+                                                    new IntegerLiteralExp(2147483647)),
                         new PrintStmt(new Variable("x")));
         final CodeGenerator generator = new CodeGenerator(CLASS_NAME, METHOD_NAME);
         generator.writeProgram(program);
