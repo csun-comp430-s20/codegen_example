@@ -1,4 +1,8 @@
-# Grammar #
+# Compilation Example #
+
+Compiles to JVM bytecode, using the [ASM](https://asm.ow2.io/) bytecode manipulation library.
+
+## Grammar ##
 
 ```
 x is a variable
