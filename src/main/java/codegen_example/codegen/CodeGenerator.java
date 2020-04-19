@@ -95,12 +95,14 @@ public class CodeGenerator {
         if (entry != null) {
             return entry;
         } else {
+            // should be caught by typechecker
             throw new CodeGeneratorException("no such variable declared: " + variable);
         }
     } // getEntryFor
 
     private VariableEntry addEntry(final Variable variable, final Type type) throws CodeGeneratorException {
         if (variables.containsKey(variable)) {
+            // should be caught by typechecker
             throw new CodeGeneratorException("Variable already in scope: " + variable);
         } else {
             final VariableEntry entry = new VariableEntry(variable, type, nextIndex++);

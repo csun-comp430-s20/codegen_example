@@ -231,4 +231,27 @@ public class CodeGeneratorTest {
                                  new PrintStmt(new Variable("x"))),
                      "50");
     }
+
+    @Test
+    public void testMultipleVars() throws CodeGeneratorException, IOException {
+        // int x = 2 + 3;
+        // int y = x + x;
+        // print(y);
+        final Exp firstAdd = new BinopExp(new IntegerLiteralExp(2),
+                                          new PlusBOP(),
+                                          new IntegerLiteralExp(3));
+        final Exp secondAdd = new BinopExp(new VariableExp(new Variable("x")),
+                                           new PlusBOP(),
+                                           new VariableExp(new Variable("x")));
+        assertOutput(makeProgram(new VariableDeclarationStmt(new IntType(),
+                                                             new Variable("x"),
+                                                             firstAdd),
+                                 new VariableDeclarationStmt(new IntType(),
+                                                             new Variable("y"),
+                                                             secondAdd),
+                                 new PrintStmt(new Variable("x")),
+                                 new PrintStmt(new Variable("y"))),
+                     "5",
+                     "10");
+    }
 } // CodeGeneratorTest
