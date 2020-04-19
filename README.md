@@ -12,6 +12,6 @@ p is a program
 t ::= int | bool
 e ::= x | i | b | e1 op e2
 op ::= + | - | / | *
-s ::= t x = e; | x = e | print(x)
+s ::= t x = e; | x = e; | print(x);
 p ::= s*
 ```
