@@ -51,6 +51,8 @@ public class CodeGenerator {
                      null, // signature (null means not generic)
                      "java/lang/Object", // superclass
                      new String[0]); // interfaces (none)
+
+        // ---BEGIN CONSTRUCTOR DEFINITION---
         final MethodVisitor constructor =
             writer.visitMethod(ACC_PUBLIC, // access modifier
                                "<init>", // method name (constructor)
@@ -66,13 +68,32 @@ public class CodeGenerator {
                                     false); // super()
         constructor.visitInsn(RETURN);
         constructor.visitMaxs(0, 0);
+        // ---END CONSTRUCTOR DEFINITION---
+
+        // ---BEGIN MAIN DEFINITION---
+        final MethodVisitor main =
+            writer.visitMethod(ACC_PUBLIC | ACC_STATIC,
+                               "main",
+                               "([Ljava/lang/String;)V",
+                               null,
+                               null);
+        main.visitCode();
+        main.visitMethodInsn(INVOKESTATIC,
+                             outputClassName,
+                             outputMethodName,
+                             "()V",
+                             false);
+        main.visitInsn(RETURN);
+        main.visitMaxs(0, 0);
+        // ---END MAIN DEFINITION---
+
         methodVisitor = writer.visitMethod(ACC_PUBLIC | ACC_STATIC,
                                            outputMethodName,
                                            "()V",
                                            null,
                                            null);
         methodVisitor.visitCode();
-    }
+    } // CodeGenerator
 
     private VariableEntry getEntryFor(final Variable variable) throws CodeGeneratorException {
         final VariableEntry entry = variables.get(variable);
