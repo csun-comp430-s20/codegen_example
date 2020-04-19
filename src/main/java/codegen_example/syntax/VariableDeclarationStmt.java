@@ -12,4 +12,14 @@ public class VariableDeclarationStmt implements Stmt {
         this.variable = variable;
         this.exp = exp;
     }
+
+    @Override
+    public String toString() {
+        return (type.toString() +
+                " " +
+                variable.toString() +
+                " = " +
+                exp.toString() +
+                ";");
+    }
 } // VariableDeclarationStmt

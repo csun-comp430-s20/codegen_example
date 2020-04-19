@@ -6,4 +6,9 @@ public class IntegerLiteralExp implements Exp {
     public IntegerLiteralExp(final int value) {
         this.value = value;
     }
+
+    @Override
+    public String toString() {
+        return Integer.toString(value);
+    }
 } // IntegerLiteralExp

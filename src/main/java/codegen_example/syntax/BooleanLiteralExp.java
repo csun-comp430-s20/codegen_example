@@ -6,4 +6,9 @@ public class BooleanLiteralExp implements Exp {
     public BooleanLiteralExp(final boolean value) {
         this.value = value;
     }
+
+    @Override
+    public String toString() {
+        return Boolean.toString(value);
+    }
 } // BooleanLiteralExp

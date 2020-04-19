@@ -10,10 +10,11 @@ import org.objectweb.asm.MethodVisitor;
 import static org.objectweb.asm.Opcodes.*;
 
 // Helpful resources:
-// -ASM reference manual: https://asm.ow2.io/asm4-guide.pdf
-// -ASM Javadoc: https://asm.ow2.io/javadoc/org/objectweb/asm/package-summary.html
 // -Basics on Java Bytecode:
+//     - JVM bytecode in general: https://www.beyondjava.net/java-programmers-guide-java-byte-code
 //     - Writing bytecode with ASM: https://www.beyondjava.net/quick-guide-writing-byte-code-asm
+// -ASM reference manual: https://asm.ow2.io/asm4-guide.pdf
+// -ASM Javadoc: https://javadoc.io/doc/org.ow2.asm/asm/latest/index.html
 // -Writing classes from scratch with ASM: https://dzone.com/articles/fully-dynamic-classes-with-asm
 
 public class Main {

@@ -9,4 +9,11 @@ public class AssignStmt implements Stmt {
         this.variable = variable;
         this.exp = exp;
     }
+
+    @Override
+    public String toString() {
+        return (variable.toString() +
+                " = " +
+                exp.toString());
+    }
 } // AssignStmt

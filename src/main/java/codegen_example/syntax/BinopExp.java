@@ -12,4 +12,15 @@ public class BinopExp implements Exp {
         this.bop = bop;
         this.right = right;
     }
+
+    @Override
+    public String toString() {
+        return ("(" +
+                left.toString() +
+                " " +
+                bop.toString() +
+                " " +
+                right.toString() +
+                ")");
+    }
 } // BinopExp

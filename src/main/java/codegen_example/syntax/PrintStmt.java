@@ -1,9 +1,14 @@
 package codegen_example.syntax;
 
 public class PrintStmt implements Stmt {
-    public final Exp exp;
+    public final Variable variable;
 
-    public PrintStmt(final Exp exp) {
-        this.exp = exp;
+    public PrintStmt(final Variable variable) {
+        this.variable = variable;
+    }
+
+    @Override
+    public String toString() {
+        return "print(" + variable.toString() + ");";
     }
 } // PrintStmt
