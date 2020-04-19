@@ -22,11 +22,6 @@ import codegen_example.syntax.*;
 // }
 
 public class CodeGenerator {
-    // ---BEGIN STATICS---
-    public static final String CLASS_NAME = "Compiled";
-    public static final String METHOD_NAME = "compiledProgram";
-    // ---END STATICS---
-    
     // ---BEGIN INSTANCE VARIABLES---
     public final String outputClassName;
     public final String outputMethodName;
@@ -233,24 +228,4 @@ public class CodeGenerator {
         output.write(writer.toByteArray());
         output.close();
     } // writeProgram
-
-    public static Program makeProgram(final Stmt... statements) {
-        final List<Stmt> list = new ArrayList<Stmt>();
-        for (final Stmt statement : statements) {
-            list.add(statement);
-        }
-        return new Program(list);
-    } // makeProgram
-    
-    public static void main(final String[] args) throws CodeGeneratorException, IOException {
-        // int x = 2147483647;
-        // print(x);
-        final Program program =
-            makeProgram(new VariableDeclarationStmt(new IntType(),
-                                                    new Variable("x"),
-                                                    new IntegerLiteralExp(2147483647)),
-                        new PrintStmt(new Variable("x")));
-        final CodeGenerator generator = new CodeGenerator(CLASS_NAME, METHOD_NAME);
-        generator.writeProgram(program);
-    } // main
 } // CodeGenerator
