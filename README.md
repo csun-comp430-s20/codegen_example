@@ -2,6 +2,8 @@
 
 Compiles to JVM bytecode, using the [ASM](https://asm.ow2.io/) bytecode manipulation library.
 
+If you're interested in seeing a bigger language which compiles to MIPS assembly, see [this example (and its branches)](https://github.com/csun-comp430-s19/codegen-expressions-example).
+
 ## Grammar ##
 
 ```
