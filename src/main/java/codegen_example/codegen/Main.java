@@ -21,7 +21,7 @@ public class Main {
     public static final String methodName = "test";
     
     // public class Test {
-    //   public static int test() { return 1; }
+    //   public int test() { return 1; }
     // }
     
     public static void main(final String[] args) throws IOException {
@@ -49,7 +49,8 @@ public class Main {
                                     "()V",
                                     false); // super()
         constructor.visitInsn(RETURN);
-        
+        constructor.visitMaxs(0, 0);
+
         final MethodVisitor testMethod =
             writer.visitMethod(ACC_PUBLIC,
                                methodName,
@@ -59,7 +60,8 @@ public class Main {
         testMethod.visitCode();
         testMethod.visitInsn(ICONST_1);
         testMethod.visitInsn(IRETURN);
-
+        testMethod.visitMaxs(0, 0);
+        
         writer.visitEnd();
                                                             
         final BufferedOutputStream output =
