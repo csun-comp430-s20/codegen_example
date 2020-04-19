@@ -125,4 +125,110 @@ public class CodeGeneratorTest {
     public void testPrintMaxInt() throws CodeGeneratorException, IOException {
         testPrintNum(Integer.MAX_VALUE);
     }
+
+    @Test
+    public void testPrintTrue() throws CodeGeneratorException, IOException {
+        // boolean x = true;
+        // print(x);
+        assertOutput(makeProgram(new VariableDeclarationStmt(new BoolType(),
+                                                             new Variable("x"),
+                                                             new BooleanLiteralExp(true)),
+                                 new PrintStmt(new Variable("x"))),
+                     "true");
+    }
+
+    @Test
+    public void testPrintFalse() throws CodeGeneratorException, IOException {
+        // boolean x = false;
+        // print(x);
+        assertOutput(makeProgram(new VariableDeclarationStmt(new BoolType(),
+                                                             new Variable("x"),
+                                                             new BooleanLiteralExp(false)),
+                                 new PrintStmt(new Variable("x"))),
+                     "false");
+    }
+
+    @Test
+    public void testIntAssignment() throws CodeGeneratorException, IOException {
+        // int x = 0;
+        // x = 1;
+        // print(x);
+        assertOutput(makeProgram(new VariableDeclarationStmt(new IntType(),
+                                                             new Variable("x"),
+                                                             new IntegerLiteralExp(0)),
+                                 new AssignStmt(new Variable("x"),
+                                                new IntegerLiteralExp(1)),
+                                 new PrintStmt(new Variable("x"))),
+                     "1");
+    }
+
+    @Test
+    public void testBoolAssignment() throws CodeGeneratorException, IOException {
+        // boolean x = true;
+        // x = false;
+        // print(x);
+        assertOutput(makeProgram(new VariableDeclarationStmt(new BoolType(),
+                                                             new Variable("x"),
+                                                             new BooleanLiteralExp(true)),
+                                 new AssignStmt(new Variable("x"),
+                                                new BooleanLiteralExp(false)),
+                                 new PrintStmt(new Variable("x"))),
+                     "false");
+    }
+
+    @Test
+    public void testAdd() throws CodeGeneratorException, IOException {
+        // int x = 1 + 2;
+        // print(x);
+        final Exp add = new BinopExp(new IntegerLiteralExp(1),
+                                     new PlusBOP(),
+                                     new IntegerLiteralExp(2));
+        assertOutput(makeProgram(new VariableDeclarationStmt(new IntType(),
+                                                             new Variable("x"),
+                                                             add),
+                                 new PrintStmt(new Variable("x"))),
+                     "3");
+    }
+
+    @Test
+    public void testSubtract() throws CodeGeneratorException, IOException {
+        // int x = 1 - 2;
+        // print(x);
+        final Exp sub = new BinopExp(new IntegerLiteralExp(1),
+                                     new MinusBOP(),
+                                     new IntegerLiteralExp(2));
+        assertOutput(makeProgram(new VariableDeclarationStmt(new IntType(),
+                                                             new Variable("x"),
+                                                             sub),
+                                 new PrintStmt(new Variable("x"))),
+                     "-1");
+    }
+
+    @Test
+    public void testDivision() throws CodeGeneratorException, IOException {
+        // int x = 10 / 5;
+        // print(x);
+        final Exp div = new BinopExp(new IntegerLiteralExp(10),
+                                     new DivBOP(),
+                                     new IntegerLiteralExp(5));
+        assertOutput(makeProgram(new VariableDeclarationStmt(new IntType(),
+                                                             new Variable("x"),
+                                                             div),
+                                 new PrintStmt(new Variable("x"))),
+                     "2");
+    }
+
+    @Test
+    public void testMult() throws CodeGeneratorException, IOException {
+        // int x = 10 * 5;
+        // print(x);
+        final Exp mult = new BinopExp(new IntegerLiteralExp(10),
+                                      new MultBOP(),
+                                      new IntegerLiteralExp(5));
+        assertOutput(makeProgram(new VariableDeclarationStmt(new IntType(),
+                                                             new Variable("x"),
+                                                             mult),
+                                 new PrintStmt(new Variable("x"))),
+                     "50");
+    }
 } // CodeGeneratorTest
