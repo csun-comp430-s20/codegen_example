@@ -17,7 +17,7 @@ s is a statement
 p is a program
 t ::= int | bool
 e ::= x | i | b | e1 op e2
-op ::= + | - | / | *
-s ::= t x = e; | x = e; | print(x);
+op ::= + | - | / | * | < | ==
+s ::= t x = e; | x = e; | print(x); | if (e) { s* } else { s* }
 p ::= s*
 ```

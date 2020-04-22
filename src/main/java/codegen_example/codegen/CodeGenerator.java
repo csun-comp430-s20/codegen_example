@@ -10,12 +10,28 @@ import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 
+import org.objectweb.asm.Label;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import static org.objectweb.asm.Opcodes.*;
 
 import codegen_example.syntax.*;
 
+// Assumptions:
+// -The input program is well-typed
+// -Shadowed variables have been renamed to ensure name-level uniqueness.
+//  For example:
+//
+//  int x = 0;
+//  { int x = 1; print(x); }
+//  print(x);
+//
+//  ...becomes:
+//
+//  int x_1 = 0;
+//  { int x_2 = 1; print(x_2); }
+//  print(x_2);
+//
 // Helpful resources:
 // -Basics on Java Bytecode:
 //     - JVM bytecode in general: https://www.beyondjava.net/java-programmers-guide-java-byte-code
@@ -142,6 +158,34 @@ public class CodeGenerator {
         }
     } // writeIntLiteral
 
+    private void writeArithmeticComparisonOp(final BOP bop) throws CodeGeneratorException {
+        // there is no direct instruction for these, but instead a branching
+        // version IF.  Basic idea (with <):
+        //   push left (assumed written already)
+        //   push right (assumed written  already)
+        //   iflt is_less_than
+        //   push 0
+        //   goto after_less_than
+        // is_less_than:
+        //   push 1
+        // after_less_than:
+        final Label conditionTrue = new Label();
+        final Label afterCondition = new Label();
+        if (bop instanceof LessThanBOP) {
+            methodVisitor.visitJumpInsn(IF_ICMPLT, conditionTrue);
+        } else if (bop instanceof EqualsBOP) {
+            methodVisitor.visitJumpInsn(IF_ICMPEQ, conditionTrue);
+        } else {
+            assert(false);
+            throw new CodeGeneratorException("Unrecognized operation: " + bop);
+        }
+        writeIntLiteral(0);
+        methodVisitor.visitJumpInsn(GOTO, afterCondition);
+        methodVisitor.visitLabel(conditionTrue);
+        writeIntLiteral(1);
+        methodVisitor.visitLabel(afterCondition);
+    } // writeArithmeticComparisonOp
+            
     private void writeOp(final BOP bop) throws CodeGeneratorException {
         if (bop instanceof PlusBOP) {
             methodVisitor.visitInsn(IADD);
@@ -151,6 +195,9 @@ public class CodeGenerator {
             methodVisitor.visitInsn(IDIV);
         } else if (bop instanceof MultBOP) {
             methodVisitor.visitInsn(IMUL);
+        } else if (bop instanceof LessThanBOP ||
+                   bop instanceof EqualsBOP) {
+            writeArithmeticComparisonOp(bop);
         } else {
             assert(false);
             throw new CodeGeneratorException("unknown binary operator: " + bop);
@@ -199,6 +246,38 @@ public class CodeGenerator {
                                       descriptor,
                                       false);
     } // writePrint
+
+    public void writeIfStatement(final IfStmt ifStmt) throws CodeGeneratorException {
+        // if false, jump to the else branch.  If true, fall through to true branch.
+        // true branch needs to jump after the false.  Looks like this:
+        //
+        //   condition_expression
+        //   if !condition, jump to false
+        //   true stuff
+        //   goto after_false
+        // false:
+        //   false stuff
+        // after_false:
+
+        // condition is a boolean, which is represented with an integer which is either
+        // 0 or 1.  IFEQ jumps if the value on top of the operand stack is 0, so this naturally
+        // ends up giving us the if !condition (as odd as it looks)
+        final Label falseLabel = new Label();
+        final Label afterFalseLabel = new Label();
+        writeExpression(ifStmt.guard);
+        methodVisitor.visitJumpInsn(IFEQ, falseLabel);
+        writeStatements(ifStmt.trueBranch);
+        methodVisitor.visitJumpInsn(GOTO, afterFalseLabel);
+        methodVisitor.visitLabel(falseLabel);
+        writeStatements(ifStmt.falseBranch);
+        methodVisitor.visitLabel(afterFalseLabel);
+    } // writeIfStatement
+
+    public void writeStatements(final List<Stmt> stmts) throws CodeGeneratorException {
+        for (final Stmt statement : stmts) {
+            writeStatement(statement);
+        }
+    } // writeStatements
     
     public void writeStatement(final Stmt stmt) throws CodeGeneratorException {
         if (stmt instanceof VariableDeclarationStmt) {
@@ -213,6 +292,8 @@ public class CodeGenerator {
             entry.store(methodVisitor);
         } else if (stmt instanceof PrintStmt) {
             writePrint(((PrintStmt)stmt).variable);
+        } else if (stmt instanceof IfStmt) {
+            writeIfStatement((IfStmt)stmt);
         } else {
             assert(false);
             throw new CodeGeneratorException("Unrecognized statement: " + stmt);
