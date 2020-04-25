@@ -19,7 +19,7 @@ import codegen_example.syntax.*;
 public class CodeGeneratorTest {
     // ---BEGIN STATICS---
     public static final String CLASS_NAME_PREFIX = "Compiled";
-    public static final String METHOD_NAME = "compiledProgram";
+    public static final FunctionName METHOD_NAME = new FunctionName("compiledProgram");
     // ---END STATICS---
 
     @Rule

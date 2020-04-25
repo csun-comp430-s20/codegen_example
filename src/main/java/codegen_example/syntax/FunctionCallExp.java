@@ -2,12 +2,12 @@ package codegen_example.syntax;
 
 import java.util.List;
 
-public class FunctionCall implements Exp {
+public class FunctionCallExp implements Exp {
     public final FunctionName name;
     public final List<Exp> actualParams;
 
-    public FunctionCall(final FunctionName name,
-                        final List<Exp> actualParams) {
+    public FunctionCallExp(final FunctionName name,
+                           final List<Exp> actualParams) {
         this.name = name;
         this.actualParams = actualParams;
     }
@@ -34,4 +34,4 @@ public class FunctionCall implements Exp {
                 expressionsToString(actualParams) +
                 ")");
     }
-} // FunctionCall
+} // FunctionCallExp

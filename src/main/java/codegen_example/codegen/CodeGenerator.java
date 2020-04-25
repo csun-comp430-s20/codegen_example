@@ -41,43 +41,48 @@ import codegen_example.syntax.*;
 // -Writing classes from scratch with ASM: https://dzone.com/articles/fully-dynamic-classes-with-asm
 public class CodeGenerator {
     // ---BEGIN INSTANCE VARIABLES---
+    public final DescriptorString emptyVoid;
     public final String outputClassName;
-    public final String outputMethodName;
+    public final FunctionName outputMethodName;
 
-    private final ClassWriter writer;
-    private final Map<Variable, VariableEntry> variables;
+    private final Map<FunctionName, Function> functionTable;
+    private final ClassWriter classWriter;
+    private Map<Variable, VariableEntry> variables;
     private int nextIndex;
     private MethodVisitor methodVisitor;
     // ---END INSTANCE VARIABLES
     
     public CodeGenerator(final String outputClassName,
-                         final String outputMethodName) {
+                         final FunctionName outputMethodName) throws CodeGeneratorException {
+        emptyVoid = DescriptorString.makeDescriptorString(new ArrayList<DescriptorParam>(),
+                                                          new DescriptorParamVoid());
         this.outputClassName = outputClassName;
         this.outputMethodName = outputMethodName;
-        writer = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
-        variables = new HashMap<Variable, VariableEntry>();
+        classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
+        variables = null;
         nextIndex = 0;
-        
-        writer.visit(V1_7, // Java 1.7
-                     ACC_PUBLIC, // public
-                     outputClassName, // class name
-                     null, // signature (null means not generic)
-                     "java/lang/Object", // superclass
-                     new String[0]); // interfaces (none)
+
+        functionTable = new HashMap<FunctionName, Function>();
+        classWriter.visit(V1_7, // Java 1.7
+                          ACC_PUBLIC, // public
+                          outputClassName, // class name
+                          null, // signature (null means not generic)
+                          "java/lang/Object", // superclass
+                          new String[0]); // interfaces (none)
 
         // ---BEGIN CONSTRUCTOR DEFINITION---
         final MethodVisitor constructor =
-            writer.visitMethod(ACC_PUBLIC, // access modifier
-                               "<init>", // method name (constructor)
-                               "()V", // descriptor (no params, returns void)
-                               null, // signature (null means not generic)
-                               null); // exceptions
+            classWriter.visitMethod(ACC_PUBLIC, // access modifier
+                                    "<init>", // method name (constructor)
+                                    emptyVoid.descriptorString, // descriptor
+                                    null, // signature (null means not generic)
+                                    null); // exceptions
         constructor.visitCode();
         constructor.visitVarInsn(ALOAD, 0); // load "this"
         constructor.visitMethodInsn(INVOKESPECIAL,
                                     "java/lang/Object",
                                     "<init>",
-                                    "()V",
+                                    emptyVoid.descriptorString,
                                     false); // super()
         constructor.visitInsn(RETURN);
         constructor.visitMaxs(0, 0);
@@ -85,16 +90,16 @@ public class CodeGenerator {
 
         // ---BEGIN MAIN DEFINITION---
         final MethodVisitor main =
-            writer.visitMethod(ACC_PUBLIC | ACC_STATIC,
-                               "main",
-                               "([Ljava/lang/String;)V",
-                               null,
-                               null);
+            classWriter.visitMethod(ACC_PUBLIC | ACC_STATIC,
+                                    "main",
+                                    "([Ljava/lang/String;)V",
+                                    null,
+                                    null);
         main.visitCode();
         main.visitMethodInsn(INVOKESTATIC,
                              outputClassName,
-                             outputMethodName,
-                             "()V",
+                             outputMethodName.name,
+                             emptyVoid.descriptorString,
                              false);
         main.visitInsn(RETURN);
         main.visitMaxs(0, 0);
@@ -103,6 +108,41 @@ public class CodeGenerator {
         methodVisitor = null;
     } // CodeGenerator
 
+    private void functionStart(final Function function) throws CodeGeneratorException {
+        functionStart(function,
+                      DescriptorString.makeDescriptorString(function));
+    } // functionStart
+
+    private void functionStart(final Function function,
+                               final DescriptorString descriptor)
+        throws CodeGeneratorException {
+        assert(variables == null);
+        assert(nextIndex == 0);
+        assert(methodVisitor == null);
+
+        variables = new HashMap<Variable, VariableEntry>();
+        for (final FormalParam formalParam : function.formalParams) {
+            addEntry(formalParam.variable, formalParam.type);
+        }
+
+        methodVisitor = classWriter.visitMethod(ACC_PUBLIC | ACC_STATIC,
+                                                function.name.name,
+                                                descriptor.descriptorString,
+                                                null,
+                                                null);
+        methodVisitor.visitCode();
+    } // functionStart
+    
+    private void functionEnd() {
+        assert(variables != null);
+        assert(methodVisitor != null);
+
+        methodVisitor.visitMaxs(0, 0);
+        nextIndex = 0;
+        variables = null;
+        methodVisitor = null;
+    } // functionEnd
+    
     private VariableEntry getEntryFor(final Variable variable) throws CodeGeneratorException {
         final VariableEntry entry = variables.get(variable);
         if (entry != null) {
@@ -148,7 +188,6 @@ public class CodeGenerator {
             methodVisitor.visitInsn(ICONST_5);
             break;
         default:
-            // writer.newConst(Integer.valueOf(value))
             methodVisitor.visitLdcInsn(Integer.valueOf(value));
         }
     } // writeIntLiteral
@@ -198,7 +237,25 @@ public class CodeGenerator {
             throw new CodeGeneratorException("unknown binary operator: " + bop);
         }
     } // writeOp
-    
+
+    private void writeFunctionCall(final FunctionCallExp call) throws CodeGeneratorException {
+        final Function function = functionTable.get(call.name);
+        if (function == null) {
+            throw new CodeGeneratorException("Call to nonexistent function: " + function.name);
+        }
+
+        final DescriptorString descriptor = DescriptorString.makeDescriptorString(function);
+
+        for (final Exp param : call.actualParams) {
+            writeExpression(param);
+        }
+        methodVisitor.visitMethodInsn(INVOKESTATIC,
+                                      outputClassName,
+                                      call.name.name,
+                                      descriptor.descriptorString,
+                                      false);
+    } // writeFunctionCall
+                                      
     private void writeExpression(final Exp exp) throws CodeGeneratorException {
         if (exp instanceof VariableExp) {
             getEntryFor(((VariableExp)exp).variable).load(methodVisitor);
@@ -212,6 +269,8 @@ public class CodeGenerator {
             writeExpression(asBinop.left);
             writeExpression(asBinop.right);
             writeOp(asBinop.bop);
+        } else if (exp instanceof FunctionCallExp) {
+            writeFunctionCall((FunctionCallExp)exp);
         } else {
             assert(false);
             throw new CodeGeneratorException("Unrecognized expression: " + exp);
@@ -315,27 +374,52 @@ public class CodeGenerator {
         }
     } // writeStatement
 
-    private void writeEntryPoint(final List<Stmt> entryPoint) throws CodeGeneratorException, IOException {
-        assert(methodVisitor == null);
-        methodVisitor = writer.visitMethod(ACC_PUBLIC | ACC_STATIC,
-                                           outputMethodName,
-                                           "()V",
-                                           null,
-                                           null);
-        methodVisitor.visitCode();
+    private void writeReturnFor(final Type type) {
+        assert(type instanceof IntType ||
+               type instanceof BoolType);
+        methodVisitor.visitInsn(IRETURN);
+    } // writeReturnFor
+    
+    private void writeFunction(final Function function) throws CodeGeneratorException {
+        functionStart(function);
+        writeStatements(function.body);
+        writeExpression(function.returned);
+        writeReturnFor(function.returnType);
+        functionEnd();
+    } // writeFunction
+    
+    private void writeEntryPoint(final List<Stmt> entryPoint) throws CodeGeneratorException {
+        functionStart(new Function(null,
+                                   outputMethodName,
+                                   new ArrayList<FormalParam>(),
+                                   null,
+                                   null),
+                      emptyVoid);
         writeStatements(entryPoint);
         methodVisitor.visitInsn(RETURN);
-        methodVisitor.visitMaxs(0, 0);
-        writer.visitEnd();
-        methodVisitor = null;
+        functionEnd();
     } // writeEntryPoint
     
+    private void loadFunctionTable(final List<Function> functions) throws CodeGeneratorException {
+        for (final Function function : functions) {
+            if (functionTable.containsKey(function.name)) {
+                throw new CodeGeneratorException("Duplicate function name: " + function.name);
+            }
+            functionTable.put(function.name, function);
+        }
+    } // loadFunctionTable
+    
     public void writeProgram(final Program program) throws CodeGeneratorException, IOException {
+        loadFunctionTable(program.functions);
+        for (final Function function : program.functions) {
+            writeFunction(function);
+        }
         writeEntryPoint(program.entryPoint);
+        classWriter.visitEnd();
         
         final BufferedOutputStream output =
             new BufferedOutputStream(new FileOutputStream(new File(outputClassName + ".class")));
-        output.write(writer.toByteArray());
+        output.write(classWriter.toByteArray());
         output.close();
     } // writeProgram
 } // CodeGenerator
