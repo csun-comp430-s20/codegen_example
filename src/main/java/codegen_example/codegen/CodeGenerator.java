@@ -47,7 +47,7 @@ public class CodeGenerator {
     private final ClassWriter writer;
     private final Map<Variable, VariableEntry> variables;
     private int nextIndex;
-    private final MethodVisitor methodVisitor;
+    private MethodVisitor methodVisitor;
     // ---END INSTANCE VARIABLES
     
     public CodeGenerator(final String outputClassName,
@@ -100,12 +100,7 @@ public class CodeGenerator {
         main.visitMaxs(0, 0);
         // ---END MAIN DEFINITION---
 
-        methodVisitor = writer.visitMethod(ACC_PUBLIC | ACC_STATIC,
-                                           outputMethodName,
-                                           "()V",
-                                           null,
-                                           null);
-        methodVisitor.visitCode();
+        methodVisitor = null;
     } // CodeGenerator
 
     private VariableEntry getEntryFor(final Variable variable) throws CodeGeneratorException {
@@ -319,14 +314,24 @@ public class CodeGenerator {
             throw new CodeGeneratorException("Unrecognized statement: " + stmt);
         }
     } // writeStatement
-    
-    public void writeProgram(final Program program) throws CodeGeneratorException, IOException {
-        for (final Stmt statement : program.statements) {
-            writeStatement(statement);
-        }
+
+    private void writeEntryPoint(final List<Stmt> entryPoint) throws CodeGeneratorException, IOException {
+        assert(methodVisitor == null);
+        methodVisitor = writer.visitMethod(ACC_PUBLIC | ACC_STATIC,
+                                           outputMethodName,
+                                           "()V",
+                                           null,
+                                           null);
+        methodVisitor.visitCode();
+        writeStatements(entryPoint);
         methodVisitor.visitInsn(RETURN);
         methodVisitor.visitMaxs(0, 0);
         writer.visitEnd();
+        methodVisitor = null;
+    } // writeEntryPoint
+    
+    public void writeProgram(final Program program) throws CodeGeneratorException, IOException {
+        writeEntryPoint(program.entryPoint);
         
         final BufferedOutputStream output =
             new BufferedOutputStream(new FileOutputStream(new File(outputClassName + ".class")));

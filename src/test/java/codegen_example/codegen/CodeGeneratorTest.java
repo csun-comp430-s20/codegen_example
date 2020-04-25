@@ -70,7 +70,8 @@ public class CodeGeneratorTest {
     } // stmts
     
     public static Program makeProgram(final Stmt... statements) {
-        return new Program(stmts(statements));
+        return new Program(new ArrayList<Function>(),
+                           stmts(statements));
     } // makeProgram
 
     public void assertOutput(final Program program,
