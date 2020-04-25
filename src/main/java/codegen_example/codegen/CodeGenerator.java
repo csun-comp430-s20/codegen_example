@@ -273,6 +273,24 @@ public class CodeGenerator {
         methodVisitor.visitLabel(afterFalseLabel);
     } // writeIfStatement
 
+    public void writeWhileStatement(final WhileStmt whileStmt) throws CodeGeneratorException {
+        // head:
+        //   condition_expression
+        //   if !condition, jump to after_while
+        //   body
+        //   goto head
+        // after_while
+
+        final Label head = new Label();
+        final Label afterWhile = new Label();
+        methodVisitor.visitLabel(head);
+        writeExpression(whileStmt.guard);
+        methodVisitor.visitJumpInsn(IFEQ, afterWhile);
+        writeStatements(whileStmt.body);
+        methodVisitor.visitJumpInsn(GOTO, head);
+        methodVisitor.visitLabel(afterWhile);
+    } // whileWhileStatement
+    
     public void writeStatements(final List<Stmt> stmts) throws CodeGeneratorException {
         for (final Stmt statement : stmts) {
             writeStatement(statement);
@@ -294,6 +312,8 @@ public class CodeGenerator {
             writePrint(((PrintStmt)stmt).variable);
         } else if (stmt instanceof IfStmt) {
             writeIfStatement((IfStmt)stmt);
+        } else if (stmt instanceof WhileStmt) {
+            writeWhileStatement((WhileStmt)stmt);
         } else {
             assert(false);
             throw new CodeGeneratorException("Unrecognized statement: " + stmt);

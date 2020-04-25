@@ -467,4 +467,78 @@ public class CodeGeneratorTest {
                                             falseBranch)),
                      "0");
     }
+
+    @Test
+    public void testWhileLoopInitiallyFalse() throws CodeGeneratorException, IOException {
+        // int x = 10;
+        // int y = -1;
+        // while (x < 10) {
+        //   print(x);
+        //   x = x + 1;
+        // }
+        // print(y);
+
+        final Variable x = new Variable("x");
+        final Variable y = new Variable("y");
+        final Program program =
+            makeProgram(new VariableDeclarationStmt(new IntType(),
+                                                    x,
+                                                    new IntegerLiteralExp(10)),
+                        new VariableDeclarationStmt(new IntType(),
+                                                    y,
+                                                    new IntegerLiteralExp(-1)),
+                        new WhileStmt(new BinopExp(new VariableExp(x),
+                                                   new LessThanBOP(),
+                                                   new IntegerLiteralExp(10)),
+                                      stmts(new PrintStmt(x),
+                                            new AssignStmt(x,
+                                                           new BinopExp(new VariableExp(x),
+                                                                        new PlusBOP(),
+                                                                        new IntegerLiteralExp(1))))),
+                        new PrintStmt(y));
+        assertOutput(program,
+                     "-1");
+    }
+
+    @Test
+    public void testWhileLoopInitiallyTrue() throws CodeGeneratorException, IOException {
+        // int x = 0;
+        // int y = -1;
+        // while (x < 10) {
+        //   print(x);
+        //   x = x + 1;
+        // }
+        // print(y);
+
+        final Variable x = new Variable("x");
+        final Variable y = new Variable("y");
+        final Program program =
+            makeProgram(new VariableDeclarationStmt(new IntType(),
+                                                    x,
+                                                    new IntegerLiteralExp(0)),
+                        new VariableDeclarationStmt(new IntType(),
+                                                    y,
+                                                    new IntegerLiteralExp(-1)),
+                        new WhileStmt(new BinopExp(new VariableExp(x),
+                                                   new LessThanBOP(),
+                                                   new IntegerLiteralExp(10)),
+                                      stmts(new PrintStmt(x),
+                                            new AssignStmt(x,
+                                                           new BinopExp(new VariableExp(x),
+                                                                        new PlusBOP(),
+                                                                        new IntegerLiteralExp(1))))),
+                        new PrintStmt(y));
+        assertOutput(program,
+                     "0",
+                     "1",
+                     "2",
+                     "3",
+                     "4",
+                     "5",
+                     "6",
+                     "7",
+                     "8",
+                     "9",
+                     "-1");
+    }
 } // CodeGeneratorTest
