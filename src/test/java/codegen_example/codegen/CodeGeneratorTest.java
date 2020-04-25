@@ -61,6 +61,22 @@ public class CodeGeneratorTest {
         }
     } // runTest
 
+    public static List<Exp> actualParams(final Exp... params) {
+        final List<Exp> list = new ArrayList<Exp>();
+        for (final Exp param : params) {
+            list.add(param);
+        }
+        return list;
+    } // actualParams
+    
+    public static List<Function> functions(final Function... theFunctions) {
+        final List<Function> list = new ArrayList<Function>();
+        for (final Function function : theFunctions) {
+            list.add(function);
+        }
+        return list;
+    } // functions
+    
     public static List<Stmt> stmts(final Stmt... statements) {
         final List<Stmt> list = new ArrayList<Stmt>();
         for (final Stmt statement : statements) {
@@ -69,9 +85,15 @@ public class CodeGeneratorTest {
         return list;
     } // stmts
     
-    public static Program makeProgram(final Stmt... statements) {
-        return new Program(new ArrayList<Function>(),
+    public static Program makeProgramWithFunctions(final List<Function> functions,
+                                                   final Stmt... statements) {
+        return new Program(functions,
                            stmts(statements));
+    } // makeProgramWithFunctions
+    
+    public static Program makeProgram(final Stmt... statements) {
+        return makeProgramWithFunctions(new ArrayList<Function>(),
+                                        statements);
     } // makeProgram
 
     public void assertOutput(final Program program,
@@ -541,5 +563,201 @@ public class CodeGeneratorTest {
                      "8",
                      "9",
                      "-1");
+    }
+
+    @Test
+    public void testFunctionReturningIntNoParams() throws CodeGeneratorException, IOException {
+        // int foo() { return 1; }
+        // int x = foo();
+        // print(x);
+
+        final FunctionName fname = new FunctionName("foo");
+        final Function foo =
+            new Function(new IntType(),
+                         fname,
+                         new ArrayList<FormalParam>(),
+                         stmts(),
+                         new IntegerLiteralExp(1));
+        final Variable x = new Variable("x");
+        final Program program =
+            makeProgramWithFunctions(functions(foo),
+                                     new VariableDeclarationStmt(new IntType(),
+                                                                 x,
+                                                                 new FunctionCallExp(fname,
+                                                                                     new ArrayList<Exp>())),
+                                     new PrintStmt(x));
+        assertOutput(program, "1");
+    }
+
+    @Test
+    public void testFunctionReturningBoolNoParams() throws CodeGeneratorException, IOException {
+        // bool foo() { return true; }
+        // bool x = foo();
+        // print(x);
+
+        final FunctionName fname = new FunctionName("foo");
+        final Function foo =
+            new Function(new BoolType(),
+                         fname,
+                         new ArrayList<FormalParam>(),
+                         stmts(),
+                         new BooleanLiteralExp(true));
+        final Variable x = new Variable("x");
+        final Program program =
+            makeProgramWithFunctions(functions(foo),
+                                     new VariableDeclarationStmt(new BoolType(),
+                                                                 x,
+                                                                 new FunctionCallExp(fname,
+                                                                                     new ArrayList<Exp>())),
+                                     new PrintStmt(x));
+        assertOutput(program, "true");
+    }
+
+    @Test
+    public void testIntFunctionTakingParams() throws CodeGeneratorException, IOException {
+        // int add(int x, int y) {
+        //   print(x);
+        //   print(y);
+        //   return x + y;
+        // }
+        // int x = add(1, 2);
+        // print(x);
+
+        final Variable x = new Variable("x");
+        final Variable y = new Variable("y");
+        final FunctionName fname = new FunctionName("add");
+        final List<FormalParam> formalParams = new ArrayList<FormalParam>();
+        formalParams.add(new FormalParam(new IntType(), new Variable("x")));
+        formalParams.add(new FormalParam(new IntType(), new Variable("y")));
+        
+        final Function add =
+            new Function(new IntType(),
+                         fname,
+                         formalParams,
+                         stmts(new PrintStmt(x),
+                               new PrintStmt(y)),
+                         new BinopExp(new VariableExp(x),
+                                      new PlusBOP(),
+                                      new VariableExp(y)));
+        final List<Exp> params = actualParams(new IntegerLiteralExp(1),
+                                              new IntegerLiteralExp(2));
+        
+        final List<Stmt> entryPoint =
+            stmts(new VariableDeclarationStmt(new IntType(),
+                                              x,
+                                              new FunctionCallExp(fname, params)),
+                  new PrintStmt(x));
+        final Program program = new Program(functions(add), entryPoint);
+
+        assertOutput(program,
+                     "1",
+                     "2",
+                     "3");
+    }
+
+    @Test
+    public void testMutualRecursion() throws CodeGeneratorException, IOException {
+        // bool isEven(int x) {
+        //   bool result = false;
+        //   if (x == 0) {
+        //     result = true;
+        //   } else {
+        //     result = isOdd(x - 1);
+        //   }
+        //   return result;
+        // }
+        //
+        // bool isOdd(int x) {
+        //   bool result = false;
+        //   if (x == 0) {
+        //     result = false;
+        //   } else {
+        //     result = isEven(x - 1);
+        //   }
+        //   return result;
+        // }
+        //
+        // bool evenYes = isEven(6);
+        // bool evenNo = isEven(7);
+        // bool oddYes = isOdd(9);
+        // bool oddNo = isOdd(10);
+        // print(evenYes);
+        // print(evenNo);
+        // print(oddYes);
+        // print(oddNo);
+        
+        final List<FormalParam> formalParams = new ArrayList<FormalParam>();
+        formalParams.add(new FormalParam(new IntType(), new Variable("x")));
+        
+        final Variable result = new Variable("result");
+        final Function isEven =
+            new Function(new BoolType(),
+                         new FunctionName("isEven"),
+                         formalParams,
+                         stmts(new VariableDeclarationStmt(new BoolType(),
+                                                           result,
+                                                           new BooleanLiteralExp(false)),
+                               new IfStmt(new BinopExp(new VariableExp(new Variable("x")),
+                                                       new EqualsBOP(),
+                                                       new IntegerLiteralExp(0)),
+                                          stmts(new AssignStmt(result,
+                                                               new BooleanLiteralExp(true))),
+                                          stmts(new AssignStmt(result,
+                                                               new FunctionCallExp(new FunctionName("isOdd"),
+                                                                                   actualParams(new BinopExp(new VariableExp(new Variable("x")),
+                                                                                                             new MinusBOP(),
+                                                                                                             new IntegerLiteralExp(1)))))))),
+                         new VariableExp(result));
+        final Function isOdd =
+            new Function(new BoolType(),
+                         new FunctionName("isOdd"),
+                         formalParams,
+                         stmts(new VariableDeclarationStmt(new BoolType(),
+                                                           result,
+                                                           new BooleanLiteralExp(false)),
+                               new IfStmt(new BinopExp(new VariableExp(new Variable("x")),
+                                                       new EqualsBOP(),
+                                                       new IntegerLiteralExp(0)),
+                                          stmts(new AssignStmt(result,
+                                                               new BooleanLiteralExp(false))),
+                                          stmts(new AssignStmt(result,
+                                                               new FunctionCallExp(new FunctionName("isEven"),
+                                                                                   actualParams(new BinopExp(new VariableExp(new Variable("x")),
+                                                                                                             new MinusBOP(),
+                                                                                                             new IntegerLiteralExp(1)))))))),
+                         new VariableExp(result));
+
+        final Variable evenYes = new Variable("evenYes");
+        final Variable evenNo = new Variable("evenNo");
+        final Variable oddYes = new Variable("oddYes");
+        final Variable oddNo = new Variable("oddNo");
+        
+        final Program program =
+            makeProgramWithFunctions(functions(isEven, isOdd),
+                                     new VariableDeclarationStmt(new BoolType(),
+                                                                 evenYes,
+                                                                 new FunctionCallExp(new FunctionName("isEven"),
+                                                                                     actualParams(new IntegerLiteralExp(6)))),
+                                     new VariableDeclarationStmt(new BoolType(),
+                                                                 evenNo,
+                                                                 new FunctionCallExp(new FunctionName("isEven"),
+                                                                                     actualParams(new IntegerLiteralExp(7)))),
+                                     new VariableDeclarationStmt(new BoolType(),
+                                                                 oddYes,
+                                                                 new FunctionCallExp(new FunctionName("isOdd"),
+                                                                                     actualParams(new IntegerLiteralExp(9)))),
+                                     new VariableDeclarationStmt(new BoolType(),
+                                                                 oddNo,
+                                                                 new FunctionCallExp(new FunctionName("isOdd"),
+                                                                                     actualParams(new IntegerLiteralExp(10)))),
+                                     new PrintStmt(evenYes),
+                                     new PrintStmt(evenNo),
+                                     new PrintStmt(oddYes),
+                                     new PrintStmt(oddNo));
+        assertOutput(program,
+                     "true",
+                     "false",
+                     "true",
+                     "false");
     }
 } // CodeGeneratorTest
