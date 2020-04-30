@@ -456,7 +456,7 @@ public class ClassGenerator {
                 }
                 writeStatements(method.body);
                 if (method instanceof MethodDefinition) {
-                    loadVariable(((MethodDefinition)method).returned);
+                    writeExpression(((MethodDefinition)method).returned);
                 }
                 doReturn(method.returnType);
                 methodVisitor.visitMaxs(0, 0);

@@ -648,6 +648,50 @@ public class CodeGeneratorTest {
                            "-1");
     } // testWhileLoopInitiallyTrue
 
+    @Test
+    public void testMethodReturningIntNoParams() throws CodeGeneratorException, IOException {
+        // class Foo extends Object {
+        //   init() { super(); }
+        //   int foo() { return 1; }
+        //   main {
+        //     Foo f = new Foo();
+        //     int x = f[Foo].foo();
+        //     print(x);
+        //   }
+        // }
+
+        final ClassName cname = new ClassName("Foo");
+        final MethodName mname = new MethodName("foo");
+        final Variable f = new Variable("f");
+        final Variable x = new Variable("x");
+        final List<Stmt> mainBody =
+            stmts(new VariableDeclarationStmt(new ReferenceType(cname),
+                                              f,
+                                              new NewExp(cname, actualParams())),
+                  new VariableDeclarationStmt(new IntType(),
+                                              x,
+                                              new MethodCallExp(new VariableExp(f),
+                                                                cname,
+                                                                mname,
+                                                                actualParams())),
+                  new PrintStmt(x));
+        final ClassDefinition classDef =
+            new ClassDefinition(cname,
+                                new ClassName(ClassGenerator.objectName),
+                                new ArrayList<FormalParam>(),
+                                new Constructor(new ArrayList<FormalParam>(),
+                                                new ArrayList<Exp>(),
+                                                stmts()),
+                                new MainDefinition(mainBody),
+                                methods(new MethodDefinition(new IntType(),
+                                                             mname,
+                                                             new ArrayList<FormalParam>(),
+                                                             stmts(),
+                                                             new IntegerLiteralExp(1))));
+        assertOutput(makeProgram(classDef),
+                     "1");
+    }
+
     /*
     @Test
     public void testFunctionReturningIntNoParams() throws CodeGeneratorException, IOException {
