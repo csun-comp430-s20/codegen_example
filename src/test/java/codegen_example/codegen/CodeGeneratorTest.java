@@ -96,6 +96,22 @@ public class CodeGeneratorTest {
         }
     } // assertOutput
 
+    public void assertOutputInMain(final String className,
+                                   final List<Stmt> body,
+                                   final String... expectedOutput)
+        throws CodeGeneratorException, IOException {
+        final Program program =
+            makeProgram(new ClassDefinition(new ClassName(className),
+                                            new ClassName(ClassGenerator.objectName),
+                                            new ArrayList<FormalParam>(),
+                                            new Constructor(new ArrayList<FormalParam>(),
+                                                            actualParams(),
+                                                            stmts()),
+                                            new MainDefinition(body),
+                                            methods()));
+        assertOutput(program, expectedOutput);
+    } // assertOutputInMain
+    
     public void testPrintNum(final int value) throws CodeGeneratorException, IOException {
         // class TestPrintNumvalue extends java/lang/Object {
         //   init() { super(); }
@@ -109,18 +125,10 @@ public class CodeGeneratorTest {
                                               new Variable("x"),
                                               new IntegerLiteralExp(value)),
                   new PrintStmt(new Variable("x")));
-        
-        final Program program =
-            makeProgram(new ClassDefinition(new ClassName("TestPrintNum" + value),
-                                            new ClassName(ClassGenerator.objectName),
-                                            new ArrayList<FormalParam>(),
-                                            new Constructor(new ArrayList<FormalParam>(),
-                                                            actualParams(),
-                                                            stmts()),
-                                            new MainDefinition(body),
-                                            methods()));
-        assertOutput(program,
-                     Integer.toString(value));
+
+        assertOutputInMain("TestPrintNum" + value,
+                           body,
+                           Integer.toString(value));
     } // testPrintNum
 
     @Test
@@ -181,18 +189,9 @@ public class CodeGeneratorTest {
                                               new Variable("x"),
                                               new BooleanLiteralExp(value)),
                   new PrintStmt(new Variable("x")));
-        
-        final Program program =
-            makeProgram(new ClassDefinition(new ClassName("TestPrintBool" + value),
-                                            new ClassName(ClassGenerator.objectName),
-                                            new ArrayList<FormalParam>(),
-                                            new Constructor(new ArrayList<FormalParam>(),
-                                                            actualParams(),
-                                                            stmts()),
-                                            new MainDefinition(body),
-                                            methods()));
-        assertOutput(program,
-                     Boolean.toString(value));
+        assertOutputInMain("TestPrintBool" + value,
+                           body,
+                           Boolean.toString(value));
     } // testPrintBool
 
     @Test
