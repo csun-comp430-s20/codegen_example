@@ -168,29 +168,44 @@ public class CodeGeneratorTest {
         testPrintNum(Integer.MAX_VALUE);
     }
 
-    /*
+    public void testPrintBool(final boolean value) throws CodeGeneratorException, IOException {
+        // class TestPrintBoolvalue extends java/lang/Object {
+        //   init() { super(); }
+        //   main {
+        //     boolean x = value;
+        //     print(x);
+        //   }
+        // }
+        final List<Stmt> body =
+            stmts(new VariableDeclarationStmt(new BoolType(),
+                                              new Variable("x"),
+                                              new BooleanLiteralExp(value)),
+                  new PrintStmt(new Variable("x")));
+        
+        final Program program =
+            makeProgram(new ClassDefinition(new ClassName("TestPrintBool" + value),
+                                            new ClassName(ClassGenerator.objectName),
+                                            new ArrayList<FormalParam>(),
+                                            new Constructor(new ArrayList<FormalParam>(),
+                                                            actualParams(),
+                                                            stmts()),
+                                            new MainDefinition(body),
+                                            methods()));
+        assertOutput(program,
+                     Boolean.toString(value));
+    } // testPrintBool
+
     @Test
     public void testPrintTrue() throws CodeGeneratorException, IOException {
-        // boolean x = true;
-        // print(x);
-        assertOutput(makeProgram(new VariableDeclarationStmt(new BoolType(),
-                                                             new Variable("x"),
-                                                             new BooleanLiteralExp(true)),
-                                 new PrintStmt(new Variable("x"))),
-                     "true");
+        testPrintBool(true);
     }
 
     @Test
     public void testPrintFalse() throws CodeGeneratorException, IOException {
-        // boolean x = false;
-        // print(x);
-        assertOutput(makeProgram(new VariableDeclarationStmt(new BoolType(),
-                                                             new Variable("x"),
-                                                             new BooleanLiteralExp(false)),
-                                 new PrintStmt(new Variable("x"))),
-                     "false");
+        testPrintBool(false);
     }
 
+    /*
     @Test
     public void testIntAssignment() throws CodeGeneratorException, IOException {
         // int x = 0;
