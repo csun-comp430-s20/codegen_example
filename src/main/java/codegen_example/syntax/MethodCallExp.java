@@ -2,12 +2,18 @@ package codegen_example.syntax;
 
 import java.util.List;
 
-public class FunctionCallExp implements Exp {
-    public final FunctionName name;
+public class MethodCallExp implements Exp {
+    public final Exp callOn;
+    public final ClassName callOnName;
+    public final MethodName name;
     public final List<Exp> actualParams;
 
-    public FunctionCallExp(final FunctionName name,
-                           final List<Exp> actualParams) {
+    public MethodCallExp(final Exp callOn,
+                         final ClassName callOnName,
+                         final MethodName name,
+                         final List<Exp> actualParams) {
+        this.callOn = callOn;
+        this.callOnName = callOnName;
         this.name = name;
         this.actualParams = actualParams;
     }
@@ -26,12 +32,4 @@ public class FunctionCallExp implements Exp {
         }
         return result.toString();
     } // expressionsToString
-    
-    @Override
-    public String toString() {
-        return (name.toString() +
-                "(" +
-                expressionsToString(actualParams) +
-                ")");
-    }
-} // FunctionCallExp
+} // MethodCallExp

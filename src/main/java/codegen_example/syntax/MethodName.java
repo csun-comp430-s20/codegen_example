@@ -1,9 +1,9 @@
 package codegen_example.syntax;
 
-public class FunctionName {
+public class MethodName {
     public final String name;
 
-    public FunctionName(final String name) {
+    public MethodName(final String name) {
         this.name = name;
     }
 
@@ -14,12 +14,12 @@ public class FunctionName {
 
     @Override
     public boolean equals(final Object other) {
-        return (other instanceof FunctionName &&
-                name.equals(((FunctionName)other).name));
+        return (other instanceof MethodName &&
+                name.equals(((MethodName)other).name));
     }
 
     @Override
     public int hashCode() {
         return name.hashCode();
     }
-} // FunctionName
+} // MethodName

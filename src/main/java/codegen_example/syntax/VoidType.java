@@ -1,22 +1,22 @@
 package codegen_example.syntax;
 
-public class IntType implements Type {
+public class VoidType implements Type {
     @Override
     public int hashCode() {
-        return 0;
+        return 2;
     }
 
     @Override
     public boolean equals(final Object other) {
-        return other instanceof IntType;
+        return other instanceof VoidType;
     }
 
     @Override
     public String toString() {
-        return "int";
+        return "void";
     }
 
     public String toDescriptorString() {
-        return "I";
+        return "V";
     }
-} // IntType
+} // VoidType
