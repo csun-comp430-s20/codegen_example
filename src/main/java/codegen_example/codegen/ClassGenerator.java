@@ -90,7 +90,11 @@ public class ClassGenerator {
     } // classDefFor
     
     private String constructorDescriptorFor(final ClassName name) throws CodeGeneratorException {
-        return classDefFor(name).constructor.toDescriptorString();
+        if (name.name.equals(objectName)) {
+            return "()V";
+        } else {
+            return classDefFor(name).constructor.toDescriptorString();
+        }
     } // constructorDescriptorFor
 
     private String methodDescriptorFor(final ClassName className,

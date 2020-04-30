@@ -1,9 +1,7 @@
 package codegen_example.codegen;
 
 import static org.junit.Assert.assertArrayEquals;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TestName;
 
 import java.io.File;
 import java.io.BufferedReader;
@@ -17,15 +15,6 @@ import java.util.ArrayList;
 import codegen_example.syntax.*;
 
 public class CodeGeneratorTest {
-    // ---BEGIN STATICS---
-    public static final String CLASS_NAME_PREFIX = "Compiled";
-    public static final FunctionName METHOD_NAME = new FunctionName("compiledProgram");
-    // ---END STATICS---
-
-    @Rule
-    public TestName testName = new TestName();
-    private String currentClassName = null;
-
     // each element of the array is a separate line
     public static String[] readUntilClose(final InputStream stream) throws IOException {
         return readUntilClose(new BufferedReader(new InputStreamReader(stream)));
@@ -45,12 +34,16 @@ public class CodeGeneratorTest {
         }
     } // readUntilClose
 
+    // Runs main in the first provided class
     public String[] runTest(final Program program)
         throws CodeGeneratorException, IOException {
-        currentClassName = CLASS_NAME_PREFIX + testName.getMethodName();
-        final CodeGenerator generator = new CodeGenerator(currentClassName, METHOD_NAME);
-        generator.writeProgram(program);
-        final ProcessBuilder builder = new ProcessBuilder("java", currentClassName);
+        assert(!program.classDefs.isEmpty());
+        
+        final ClassGenerator generator = new ClassGenerator(program);
+        generator.writeClasses();
+        
+        final ProcessBuilder builder =
+            new ProcessBuilder("java", program.classDefs.get(0).name.name);
         builder.redirectErrorStream(true);
         final Process process = builder.start();
         try {
@@ -69,13 +62,13 @@ public class CodeGeneratorTest {
         return list;
     } // actualParams
     
-    public static List<Function> functions(final Function... theFunctions) {
-        final List<Function> list = new ArrayList<Function>();
-        for (final Function function : theFunctions) {
-            list.add(function);
+    public static List<MethodDefinition> methods(final MethodDefinition... theMethods) {
+        final List<MethodDefinition> list = new ArrayList<MethodDefinition>();
+        for (final MethodDefinition method : theMethods) {
+            list.add(method);
         }
         return list;
-    } // functions
+    } // methods
     
     public static List<Stmt> stmts(final Stmt... statements) {
         final List<Stmt> list = new ArrayList<Stmt>();
@@ -84,36 +77,52 @@ public class CodeGeneratorTest {
         }
         return list;
     } // stmts
-    
-    public static Program makeProgramWithFunctions(final List<Function> functions,
-                                                   final Stmt... statements) {
-        return new Program(functions,
-                           stmts(statements));
-    } // makeProgramWithFunctions
-    
-    public static Program makeProgram(final Stmt... statements) {
-        return makeProgramWithFunctions(new ArrayList<Function>(),
-                                        statements);
-    } // makeProgram
 
+    public static Program makeProgram(final ClassDefinition... classDefs) {
+        final List<ClassDefinition> list = new ArrayList<ClassDefinition>();
+        for (final ClassDefinition classDef : classDefs) {
+            list.add(classDef);
+        }
+        return new Program(list);
+    } // makeProgram
+    
     public void assertOutput(final Program program,
                              final String... expectedOutput)
         throws CodeGeneratorException, IOException {
         assertArrayEquals(expectedOutput,
                           runTest(program));
-        new File(currentClassName + ".class").delete();
-    } // runTest
+        for (final ClassDefinition classDef : program.classDefs) {
+            new File(classDef.name.name + ".class").delete();
+        }
+    } // assertOutput
 
     public void testPrintNum(final int value) throws CodeGeneratorException, IOException {
-        // int x = value;
-        // print(x);
-        assertOutput(makeProgram(new VariableDeclarationStmt(new IntType(),
-                                                             new Variable("x"),
-                                                             new IntegerLiteralExp(value)),
-                                 new PrintStmt(new Variable("x"))),
+        // class TestPrintNumvalue extends java/lang/Object {
+        //   init() { super(); }
+        //   main {
+        //     int x = value;
+        //     print(x);
+        //   }
+        // }
+        final List<Stmt> body =
+            stmts(new VariableDeclarationStmt(new IntType(),
+                                              new Variable("x"),
+                                              new IntegerLiteralExp(value)),
+                  new PrintStmt(new Variable("x")));
+        
+        final Program program =
+            makeProgram(new ClassDefinition(new ClassName("TestPrintNum" + value),
+                                            new ClassName(ClassGenerator.objectName),
+                                            new ArrayList<FormalParam>(),
+                                            new Constructor(new ArrayList<FormalParam>(),
+                                                            actualParams(),
+                                                            stmts()),
+                                            new MainDefinition(body),
+                                            methods()));
+        assertOutput(program,
                      Integer.toString(value));
     } // testPrintNum
-        
+
     @Test
     public void testPrintMinusOne() throws CodeGeneratorException, IOException {
         testPrintNum(-1);
@@ -159,6 +168,7 @@ public class CodeGeneratorTest {
         testPrintNum(Integer.MAX_VALUE);
     }
 
+    /*
     @Test
     public void testPrintTrue() throws CodeGeneratorException, IOException {
         // boolean x = true;
@@ -760,4 +770,5 @@ public class CodeGeneratorTest {
                      "true",
                      "false");
     }
+    */
 } // CodeGeneratorTest
