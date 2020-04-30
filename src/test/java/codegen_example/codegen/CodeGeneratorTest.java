@@ -134,47 +134,47 @@ public class CodeGeneratorTest {
     @Test
     public void testPrintMinusOne() throws CodeGeneratorException, IOException {
         testPrintNum(-1);
-    }
+    } // testPrintMinusOne
 
     @Test
     public void testPrintZero() throws CodeGeneratorException, IOException {
         testPrintNum(0);
-    }
+    } // testPrintZero
 
     @Test
     public void testPrintOne() throws CodeGeneratorException, IOException {
         testPrintNum(1);
-    }
+    } // testPrintOne
 
     @Test
     public void testPrintTwo() throws CodeGeneratorException, IOException {
         testPrintNum(2);
-    }
+    } // testPrintTwo
 
     @Test
     public void testPrintThree() throws CodeGeneratorException, IOException {
         testPrintNum(3);
-    }
+    } // testPrintThree
 
     @Test
     public void testPrintFour() throws CodeGeneratorException, IOException {
         testPrintNum(4);
-    }
+    } // testPrintFour
 
     @Test
     public void testPrintFive() throws CodeGeneratorException, IOException {
         testPrintNum(5);
-    }
+    } // testPrintFive
 
     @Test
     public void testPrintSix() throws CodeGeneratorException, IOException {
         testPrintNum(6);
-    }
+    } // testPrintSix
 
     @Test
     public void testPrintMaxInt() throws CodeGeneratorException, IOException {
         testPrintNum(Integer.MAX_VALUE);
-    }
+    } // testPrintMaxInt
 
     public void testPrintBool(final boolean value) throws CodeGeneratorException, IOException {
         // class TestPrintBoolvalue extends java/lang/Object {
@@ -197,41 +197,46 @@ public class CodeGeneratorTest {
     @Test
     public void testPrintTrue() throws CodeGeneratorException, IOException {
         testPrintBool(true);
-    }
+    } // testPrintTrue
 
     @Test
     public void testPrintFalse() throws CodeGeneratorException, IOException {
         testPrintBool(false);
-    }
+    } // testPrintFalse
 
-    /*
     @Test
     public void testIntAssignment() throws CodeGeneratorException, IOException {
         // int x = 0;
         // x = 1;
         // print(x);
-        assertOutput(makeProgram(new VariableDeclarationStmt(new IntType(),
-                                                             new Variable("x"),
-                                                             new IntegerLiteralExp(0)),
-                                 new AssignStmt(new Variable("x"),
-                                                new IntegerLiteralExp(1)),
-                                 new PrintStmt(new Variable("x"))),
-                     "1");
-    }
+        final List<Stmt> body =
+            stmts(new VariableDeclarationStmt(new IntType(),
+                                              new Variable("x"),
+                                              new IntegerLiteralExp(0)),
+                  new AssignStmt(new Variable("x"),
+                                 new IntegerLiteralExp(1)),
+                  new PrintStmt(new Variable("x")));
+        assertOutputInMain("TestIntAssignment",
+                           body,
+                           "1");
+    } // testIntAssignment
 
     @Test
     public void testBoolAssignment() throws CodeGeneratorException, IOException {
         // boolean x = true;
         // x = false;
         // print(x);
-        assertOutput(makeProgram(new VariableDeclarationStmt(new BoolType(),
-                                                             new Variable("x"),
-                                                             new BooleanLiteralExp(true)),
-                                 new AssignStmt(new Variable("x"),
-                                                new BooleanLiteralExp(false)),
-                                 new PrintStmt(new Variable("x"))),
-                     "false");
-    }
+        final List<Stmt> body =
+            stmts(new VariableDeclarationStmt(new BoolType(),
+                                              new Variable("x"),
+                                              new BooleanLiteralExp(true)),
+                  new AssignStmt(new Variable("x"),
+                                 new BooleanLiteralExp(false)),
+                  new PrintStmt(new Variable("x")));
+        assertOutputInMain("TestBoolAssignment",
+                           body,
+                           "false");
+    } // testBoolAssignment
 
     @Test
     public void testAdd() throws CodeGeneratorException, IOException {
@@ -240,12 +245,15 @@ public class CodeGeneratorTest {
         final Exp add = new BinopExp(new IntegerLiteralExp(1),
                                      new PlusBOP(),
                                      new IntegerLiteralExp(2));
-        assertOutput(makeProgram(new VariableDeclarationStmt(new IntType(),
-                                                             new Variable("x"),
-                                                             add),
-                                 new PrintStmt(new Variable("x"))),
-                     "3");
-    }
+        final List<Stmt> body =
+            stmts(new VariableDeclarationStmt(new IntType(),
+                                              new Variable("x"),
+                                              add),
+                  new PrintStmt(new Variable("x")));
+        assertOutputInMain("TestAdd",
+                           body,
+                           "3");
+    } // testAdd
 
     @Test
     public void testSubtract() throws CodeGeneratorException, IOException {
@@ -254,12 +262,15 @@ public class CodeGeneratorTest {
         final Exp sub = new BinopExp(new IntegerLiteralExp(1),
                                      new MinusBOP(),
                                      new IntegerLiteralExp(2));
-        assertOutput(makeProgram(new VariableDeclarationStmt(new IntType(),
-                                                             new Variable("x"),
-                                                             sub),
-                                 new PrintStmt(new Variable("x"))),
-                     "-1");
-    }
+        final List<Stmt> body =
+            stmts(new VariableDeclarationStmt(new IntType(),
+                                              new Variable("x"),
+                                              sub),
+                  new PrintStmt(new Variable("x")));
+        assertOutputInMain("TestSubtract",
+                           body,
+                           "-1");
+    } // testSubtract
 
     @Test
     public void testDivision() throws CodeGeneratorException, IOException {
@@ -268,12 +279,15 @@ public class CodeGeneratorTest {
         final Exp div = new BinopExp(new IntegerLiteralExp(10),
                                      new DivBOP(),
                                      new IntegerLiteralExp(5));
-        assertOutput(makeProgram(new VariableDeclarationStmt(new IntType(),
-                                                             new Variable("x"),
-                                                             div),
-                                 new PrintStmt(new Variable("x"))),
-                     "2");
-    }
+        final List<Stmt> body =
+            stmts(new VariableDeclarationStmt(new IntType(),
+                                              new Variable("x"),
+                                              div),
+                  new PrintStmt(new Variable("x")));
+        assertOutputInMain("TestDivision",
+                           body,
+                           "2");
+    } // testDivision
 
     @Test
     public void testMult() throws CodeGeneratorException, IOException {
@@ -282,12 +296,15 @@ public class CodeGeneratorTest {
         final Exp mult = new BinopExp(new IntegerLiteralExp(10),
                                       new MultBOP(),
                                       new IntegerLiteralExp(5));
-        assertOutput(makeProgram(new VariableDeclarationStmt(new IntType(),
-                                                             new Variable("x"),
-                                                             mult),
-                                 new PrintStmt(new Variable("x"))),
-                     "50");
-    }
+        final List<Stmt> body =
+            stmts(new VariableDeclarationStmt(new IntType(),
+                                              new Variable("x"),
+                                              mult),
+                  new PrintStmt(new Variable("x")));
+        assertOutputInMain("TestMult",
+                           body,
+                           "50");
+    } // testMult
 
     @Test
     public void testLessThanFalse() throws CodeGeneratorException, IOException {
@@ -296,12 +313,15 @@ public class CodeGeneratorTest {
         final Exp lt = new BinopExp(new IntegerLiteralExp(10),
                                     new LessThanBOP(),
                                     new IntegerLiteralExp(5));
-        assertOutput(makeProgram(new VariableDeclarationStmt(new BoolType(),
-                                                             new Variable("b"),
-                                                             lt),
-                                 new PrintStmt(new Variable("b"))),
-                     "false");
-    }
+        final List<Stmt> body =
+            stmts(new VariableDeclarationStmt(new BoolType(),
+                                              new Variable("b"),
+                                              lt),
+                  new PrintStmt(new Variable("b")));
+        assertOutputInMain("TestLessThanFalse",
+                           body,
+                           "false");
+    } // testLessThanFalse
 
     // key point: this test does NOT improve coverage, but it did catch a bug -
     // I was using the wrong bytecode instruction, but the issue was only apparent
@@ -312,12 +332,15 @@ public class CodeGeneratorTest {
         final Exp lt = new BinopExp(new IntegerLiteralExp(5),
                                     new LessThanBOP(),
                                     new IntegerLiteralExp(10));
-        assertOutput(makeProgram(new VariableDeclarationStmt(new BoolType(),
-                                                             new Variable("b"),
-                                                             lt),
-                                 new PrintStmt(new Variable("b"))),
-                     "true");
-    }
+        final List<Stmt> body =
+            stmts(new VariableDeclarationStmt(new BoolType(),
+                                              new Variable("b"),
+                                              lt),
+                  new PrintStmt(new Variable("b")));
+        assertOutputInMain("TestLessThanTrue",
+                           body,
+                           "true");
+    } // testLessThanTrue
 
     @Test
     public void testEqualsFalse() throws CodeGeneratorException, IOException {
@@ -326,12 +349,15 @@ public class CodeGeneratorTest {
         final Exp exp = new BinopExp(new IntegerLiteralExp(10),
                                      new EqualsBOP(),
                                      new IntegerLiteralExp(5));
-        assertOutput(makeProgram(new VariableDeclarationStmt(new BoolType(),
-                                                             new Variable("b"),
-                                                             exp),
-                                 new PrintStmt(new Variable("b"))),
-                     "false");
-    }
+        final List<Stmt> body =
+            stmts(new VariableDeclarationStmt(new BoolType(),
+                                              new Variable("b"),
+                                              exp),
+                  new PrintStmt(new Variable("b")));
+        assertOutputInMain("TestEqualsFalse",
+                           body,
+                           "false");
+    } // testEqualsFalse
 
     @Test
     public void testEqualsTrue() throws CodeGeneratorException, IOException {
@@ -340,12 +366,15 @@ public class CodeGeneratorTest {
         final Exp exp = new BinopExp(new IntegerLiteralExp(10),
                                      new EqualsBOP(),
                                      new IntegerLiteralExp(10));
-        assertOutput(makeProgram(new VariableDeclarationStmt(new BoolType(),
-                                                             new Variable("b"),
-                                                             exp),
-                                 new PrintStmt(new Variable("b"))),
-                     "true");
-    }
+        final List<Stmt> body =
+            stmts(new VariableDeclarationStmt(new BoolType(),
+                                              new Variable("b"),
+                                              exp),
+                  new PrintStmt(new Variable("b")));
+        assertOutputInMain("TestEqualsTrue",
+                           body,
+                           "true");
+    } // testEqualsTrue
 
     @Test
     public void testMultipleVars() throws CodeGeneratorException, IOException {
@@ -358,17 +387,20 @@ public class CodeGeneratorTest {
         final Exp secondAdd = new BinopExp(new VariableExp(new Variable("x")),
                                            new PlusBOP(),
                                            new VariableExp(new Variable("x")));
-        assertOutput(makeProgram(new VariableDeclarationStmt(new IntType(),
-                                                             new Variable("x"),
-                                                             firstAdd),
-                                 new VariableDeclarationStmt(new IntType(),
-                                                             new Variable("y"),
-                                                             secondAdd),
-                                 new PrintStmt(new Variable("x")),
-                                 new PrintStmt(new Variable("y"))),
-                     "5",
-                     "10");
-    }
+        final List<Stmt> body =
+            stmts(new VariableDeclarationStmt(new IntType(),
+                                              new Variable("x"),
+                                              firstAdd),
+                  new VariableDeclarationStmt(new IntType(),
+                                              new Variable("y"),
+                                              secondAdd),
+                  new PrintStmt(new Variable("x")),
+                  new PrintStmt(new Variable("y")));
+        assertOutputInMain("TestMultipleVars",
+                           body,
+                           "5",
+                           "10");
+    } // testMultipleVars
 
     @Test
     public void testIfTrueTrivialCondition() throws CodeGeneratorException, IOException {
@@ -379,17 +411,21 @@ public class CodeGeneratorTest {
         // } else {
         //   print(y);
         // }
-        assertOutput(makeProgram(new VariableDeclarationStmt(new IntType(),
-                                                             new Variable("x"),
-                                                             new IntegerLiteralExp(0)),
-                                 new VariableDeclarationStmt(new IntType(),
-                                                             new Variable("y"),
-                                                             new IntegerLiteralExp(1)),
-                                 new IfStmt(new BooleanLiteralExp(true),
-                                            stmts(new PrintStmt(new Variable("x"))),
-                                            stmts(new PrintStmt(new Variable("y"))))),
-                     "0");
-    }
+
+        final List<Stmt> body =
+            stmts(new VariableDeclarationStmt(new IntType(),
+                                              new Variable("x"),
+                                              new IntegerLiteralExp(0)),
+                  new VariableDeclarationStmt(new IntType(),
+                                              new Variable("y"),
+                                              new IntegerLiteralExp(1)),
+                  new IfStmt(new BooleanLiteralExp(true),
+                             stmts(new PrintStmt(new Variable("x"))),
+                             stmts(new PrintStmt(new Variable("y")))));
+        assertOutputInMain("TestIfTrueTrivialCondition",
+                           body,
+                           "0");
+    } // testIfTrueTrivialCondition
 
     @Test
     public void testIfFalseTrivialCondition() throws CodeGeneratorException, IOException {
@@ -400,17 +436,21 @@ public class CodeGeneratorTest {
         // } else {
         //   print(y);
         // }
-        assertOutput(makeProgram(new VariableDeclarationStmt(new IntType(),
-                                                             new Variable("x"),
-                                                             new IntegerLiteralExp(0)),
-                                 new VariableDeclarationStmt(new IntType(),
-                                                             new Variable("y"),
-                                                             new IntegerLiteralExp(1)),
-                                 new IfStmt(new BooleanLiteralExp(false),
-                                            stmts(new PrintStmt(new Variable("x"))),
-                                            stmts(new PrintStmt(new Variable("y"))))),
-                     "1");
-    }
+
+        final List<Stmt> body =
+            stmts(new VariableDeclarationStmt(new IntType(),
+                                              new Variable("x"),
+                                              new IntegerLiteralExp(0)),
+                  new VariableDeclarationStmt(new IntType(),
+                                              new Variable("y"),
+                                              new IntegerLiteralExp(1)),
+                  new IfStmt(new BooleanLiteralExp(false),
+                             stmts(new PrintStmt(new Variable("x"))),
+                             stmts(new PrintStmt(new Variable("y")))));
+        assertOutputInMain("TestIfFalseTrivialCondition",
+                           body,
+                           "1");
+    } // testIfFalseTrivialCondition
 
     @Test
     public void testEmptyTrueBranch() throws CodeGeneratorException, IOException {
@@ -419,13 +459,17 @@ public class CodeGeneratorTest {
         // } else {
         //   print(x);
         // }
-        assertOutput(makeProgram(new VariableDeclarationStmt(new IntType(),
-                                                             new Variable("x"),
-                                                             new IntegerLiteralExp(0)),
-                                 new IfStmt(new BooleanLiteralExp(true),
-                                            stmts(),
-                                            stmts(new PrintStmt(new Variable("x"))))));
-    }
+
+        final List<Stmt> body =
+            stmts(new VariableDeclarationStmt(new IntType(),
+                                              new Variable("x"),
+                                              new IntegerLiteralExp(0)),
+                  new IfStmt(new BooleanLiteralExp(true),
+                             stmts(),
+                             stmts(new PrintStmt(new Variable("x")))));
+        assertOutputInMain("TestEmptyTrueBranch",
+                           body);
+    } // testEmptyTrueBranch
 
     @Test
     public void testEmptyFalseBranch() throws CodeGeneratorException, IOException {
@@ -434,13 +478,17 @@ public class CodeGeneratorTest {
         //   print(x);
         // } else {
         // }
-        assertOutput(makeProgram(new VariableDeclarationStmt(new IntType(),
-                                                             new Variable("x"),
-                                                             new IntegerLiteralExp(0)),
-                                 new IfStmt(new BooleanLiteralExp(false),
-                                            stmts(new PrintStmt(new Variable("x"))),
-                                            stmts())));
-    }
+
+        final List<Stmt> body =
+            stmts(new VariableDeclarationStmt(new IntType(),
+                                              new Variable("x"),
+                                              new IntegerLiteralExp(0)),
+                  new IfStmt(new BooleanLiteralExp(false),
+                             stmts(new PrintStmt(new Variable("x"))),
+                             stmts()));
+        assertOutputInMain("TestEmptyFalseBranch",
+                           body);
+    } // testEmptyFalseBranch
 
     @Test
     public void testIfComplexConditionTrue() throws CodeGeneratorException, IOException {
@@ -454,17 +502,20 @@ public class CodeGeneratorTest {
         final Exp guard = new BinopExp(new VariableExp(new Variable("x")),
                                        new LessThanBOP(),
                                        new VariableExp(new Variable("y")));
-        assertOutput(makeProgram(new VariableDeclarationStmt(new IntType(),
-                                                             new Variable("x"),
-                                                             new IntegerLiteralExp(0)),
-                                 new VariableDeclarationStmt(new IntType(),
-                                                             new Variable("y"),
-                                                             new IntegerLiteralExp(1)),
-                                 new IfStmt(guard,
-                                            stmts(new PrintStmt(new Variable("x"))),
-                                            stmts(new PrintStmt(new Variable("y"))))),
-                     "0");
-    }
+        final List<Stmt> body =
+            stmts(new VariableDeclarationStmt(new IntType(),
+                                              new Variable("x"),
+                                              new IntegerLiteralExp(0)),
+                  new VariableDeclarationStmt(new IntType(),
+                                              new Variable("y"),
+                                              new IntegerLiteralExp(1)),
+                  new IfStmt(guard,
+                             stmts(new PrintStmt(new Variable("x"))),
+                             stmts(new PrintStmt(new Variable("y")))));
+        assertOutputInMain("TestIfComplexConditionTrue",
+                           body,
+                           "0");
+    } // testIfComplexConditionTrue
     
     @Test
     public void testIfComplexConditionFalse() throws CodeGeneratorException, IOException {
@@ -478,17 +529,20 @@ public class CodeGeneratorTest {
         final Exp guard = new BinopExp(new VariableExp(new Variable("y")),
                                        new LessThanBOP(),
                                        new VariableExp(new Variable("x")));
-        assertOutput(makeProgram(new VariableDeclarationStmt(new IntType(),
-                                                             new Variable("x"),
-                                                             new IntegerLiteralExp(0)),
-                                 new VariableDeclarationStmt(new IntType(),
-                                                             new Variable("y"),
-                                                             new IntegerLiteralExp(1)),
-                                 new IfStmt(guard,
-                                            stmts(new PrintStmt(new Variable("x"))),
-                                            stmts(new PrintStmt(new Variable("y"))))),
-                     "1");
-    }
+        final List<Stmt> body =
+            stmts(new VariableDeclarationStmt(new IntType(),
+                                              new Variable("x"),
+                                              new IntegerLiteralExp(0)),
+                  new VariableDeclarationStmt(new IntType(),
+                                              new Variable("y"),
+                                              new IntegerLiteralExp(1)),
+                  new IfStmt(guard,
+                             stmts(new PrintStmt(new Variable("x"))),
+                             stmts(new PrintStmt(new Variable("y")))));
+        assertOutputInMain("TestIfComplexConditionFalse",
+                           body,
+                           "1");
+    } // testIfComplexConditionFalse
 
     @Test
     public void testNestedVariableDeclaration() throws CodeGeneratorException, IOException {
@@ -509,11 +563,14 @@ public class CodeGeneratorTest {
                                               new Variable("y"),
                                               new IntegerLiteralExp(1)),
                   new PrintStmt(new Variable("y")));
-        assertOutput(makeProgram(new IfStmt(new BooleanLiteralExp(true),
-                                            trueBranch,
-                                            falseBranch)),
-                     "0");
-    }
+        final List<Stmt> body =
+            stmts(new IfStmt(new BooleanLiteralExp(true),
+                             trueBranch,
+                             falseBranch));
+        assertOutputInMain("TestNestedVariableDeclaration",
+                           body,
+                           "0");
+    } // testNestedVariableDeclaration
 
     @Test
     public void testWhileLoopInitiallyFalse() throws CodeGeneratorException, IOException {
@@ -527,25 +584,26 @@ public class CodeGeneratorTest {
 
         final Variable x = new Variable("x");
         final Variable y = new Variable("y");
-        final Program program =
-            makeProgram(new VariableDeclarationStmt(new IntType(),
-                                                    x,
-                                                    new IntegerLiteralExp(10)),
-                        new VariableDeclarationStmt(new IntType(),
-                                                    y,
-                                                    new IntegerLiteralExp(-1)),
-                        new WhileStmt(new BinopExp(new VariableExp(x),
-                                                   new LessThanBOP(),
-                                                   new IntegerLiteralExp(10)),
-                                      stmts(new PrintStmt(x),
-                                            new AssignStmt(x,
-                                                           new BinopExp(new VariableExp(x),
-                                                                        new PlusBOP(),
-                                                                        new IntegerLiteralExp(1))))),
-                        new PrintStmt(y));
-        assertOutput(program,
-                     "-1");
-    }
+        final List<Stmt> body =
+            stmts(new VariableDeclarationStmt(new IntType(),
+                                              x,
+                                              new IntegerLiteralExp(10)),
+                  new VariableDeclarationStmt(new IntType(),
+                                              y,
+                                              new IntegerLiteralExp(-1)),
+                  new WhileStmt(new BinopExp(new VariableExp(x),
+                                             new LessThanBOP(),
+                                             new IntegerLiteralExp(10)),
+                                stmts(new PrintStmt(x),
+                                      new AssignStmt(x,
+                                                     new BinopExp(new VariableExp(x),
+                                                                  new PlusBOP(),
+                                                                  new IntegerLiteralExp(1))))),
+                  new PrintStmt(y));
+        assertOutputInMain("TestWhileLoopInitiallyFalse",
+                           body,
+                           "-1");
+    } // testWhileLoopInitiallyFalse
 
     @Test
     public void testWhileLoopInitiallyTrue() throws CodeGeneratorException, IOException {
@@ -559,36 +617,38 @@ public class CodeGeneratorTest {
 
         final Variable x = new Variable("x");
         final Variable y = new Variable("y");
-        final Program program =
-            makeProgram(new VariableDeclarationStmt(new IntType(),
-                                                    x,
-                                                    new IntegerLiteralExp(0)),
-                        new VariableDeclarationStmt(new IntType(),
-                                                    y,
-                                                    new IntegerLiteralExp(-1)),
-                        new WhileStmt(new BinopExp(new VariableExp(x),
-                                                   new LessThanBOP(),
-                                                   new IntegerLiteralExp(10)),
-                                      stmts(new PrintStmt(x),
-                                            new AssignStmt(x,
-                                                           new BinopExp(new VariableExp(x),
-                                                                        new PlusBOP(),
-                                                                        new IntegerLiteralExp(1))))),
-                        new PrintStmt(y));
-        assertOutput(program,
-                     "0",
-                     "1",
-                     "2",
-                     "3",
-                     "4",
-                     "5",
-                     "6",
-                     "7",
-                     "8",
-                     "9",
-                     "-1");
-    }
+        final List<Stmt> body =
+            stmts(new VariableDeclarationStmt(new IntType(),
+                                              x,
+                                              new IntegerLiteralExp(0)),
+                  new VariableDeclarationStmt(new IntType(),
+                                              y,
+                                              new IntegerLiteralExp(-1)),
+                  new WhileStmt(new BinopExp(new VariableExp(x),
+                                             new LessThanBOP(),
+                                             new IntegerLiteralExp(10)),
+                                stmts(new PrintStmt(x),
+                                      new AssignStmt(x,
+                                                     new BinopExp(new VariableExp(x),
+                                                                  new PlusBOP(),
+                                                                  new IntegerLiteralExp(1))))),
+                  new PrintStmt(y));
+        assertOutputInMain("TestWhileLoopInitiallyTrue",
+                           body,
+                           "0",
+                           "1",
+                           "2",
+                           "3",
+                           "4",
+                           "5",
+                           "6",
+                           "7",
+                           "8",
+                           "9",
+                           "-1");
+    } // testWhileLoopInitiallyTrue
 
+    /*
     @Test
     public void testFunctionReturningIntNoParams() throws CodeGeneratorException, IOException {
         // int foo() { return 1; }
