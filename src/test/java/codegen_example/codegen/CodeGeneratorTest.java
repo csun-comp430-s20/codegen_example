@@ -934,4 +934,185 @@ public class CodeGeneratorTest {
                      "true",
                      "false");
     } // testMutualRecursion
+
+    @Test
+    public void testGettersSetters() throws CodeGeneratorException, IOException {
+        // class TestGettersSetters extends Object {
+        //   int theInt;
+        //   bool theBool;
+        //   init(int theInt, int theBool) {
+        //     super();
+        //     print(theInt);
+        //     print(theBool);
+        //     this[TestGettersSetters].theInt = theInt;
+        //     this[TestGettersSetters].theBool = theBool;
+        //   }
+        //   int getInt() {
+        //     return this[TestGettersSetters].theInt;
+        //   }
+        //   bool getBool() {
+        //     return this[TestGettersSetters].theBool;
+        //   }
+        //   int setInt(int theInt) {
+        //     this[TestGettersSetters].theInt = theInt;
+        //     return 0;
+        //   }
+        //   int setBool(bool theBool) {
+        //     this[TestGettersSetters].theBool = theBool;
+        //     return 0;
+        //   }
+        //   int printContents() {
+        //     int tempInt = this[TestGettersSetters].getInt();
+        //     bool tempBool = this[TestGettersSetters].getBool();
+        //     print(tempInt);
+        //     print(tempBool);
+        //     return 0;
+        //   }
+        //   main {
+        //     TestGettersSetters f = new TestGettersSetters(1, true);
+        //     int junk = f[TestGettersSetters].printContents();
+        //     junk = f[TestGettersSetters].setInt(5);
+        //     junk = f[TestGettersSetters].setBool(false);
+        //     junk = f[TestGettersSetters].printContents();
+        //   }
+        // }
+
+        final ClassName cname = new ClassName("TestGettersSetters");
+        final Variable f = new Variable("f");
+        final Variable theInt = new Variable("theInt");
+        final Variable theBool = new Variable("theBool");
+        final Variable thisVar = new Variable("this");
+        final Variable junk = new Variable("junk");
+        final Variable tempInt = new Variable("tempInt");
+        final Variable tempBool = new Variable("tempBool");
+        final MethodName setInt = new MethodName("setInt");
+        final MethodName getInt = new MethodName("getInt");
+        final MethodName setBool = new MethodName("setBool");
+        final MethodName getBool = new MethodName("getBool");
+        final MethodName printContents = new MethodName("printContents");
+
+        final List<FormalParam> bothFormalParams = new ArrayList<FormalParam>();
+        bothFormalParams.add(new FormalParam(new IntType(), theInt));
+        bothFormalParams.add(new FormalParam(new BoolType(), theBool));
+
+        final List<FormalParam> setIntFormalParams = new ArrayList<FormalParam>();
+        setIntFormalParams.add(new FormalParam(new IntType(), theInt));
+        final List<FormalParam> setBoolFormalParams = new ArrayList<FormalParam>();
+        setBoolFormalParams.add(new FormalParam(new BoolType(), theBool));
+
+        final List<Stmt> constructorBody =
+            stmts(new PrintStmt(theInt),
+                  new PrintStmt(theBool),
+                  new PutStmt(new VariableExp(thisVar),
+                              cname,
+                              theInt,
+                              new VariableExp(theInt)),
+                  new PutStmt(new VariableExp(thisVar),
+                              cname,
+                              theBool,
+                              new VariableExp(theBool)));
+
+        final List<Stmt> mainBody =
+            stmts(new VariableDeclarationStmt(new ReferenceType(cname),
+                                              f,
+                                              new NewExp(cname,
+                                                         actualParams(new IntegerLiteralExp(1),
+                                                                      new BooleanLiteralExp(true)))),
+                  new VariableDeclarationStmt(new IntType(),
+                                              junk,
+                                              new MethodCallExp(new VariableExp(f),
+                                                                cname,
+                                                                printContents,
+                                                                actualParams())),
+                  new AssignStmt(junk,
+                                 new MethodCallExp(new VariableExp(f),
+                                                   cname,
+                                                   setInt,
+                                                   actualParams(new IntegerLiteralExp(5)))),
+                  new AssignStmt(junk,
+                                 new MethodCallExp(new VariableExp(f),
+                                                   cname,
+                                                   setBool,
+                                                   actualParams(new BooleanLiteralExp(false)))),
+                  new AssignStmt(junk,
+                                 new MethodCallExp(new VariableExp(f),
+                                                   cname,
+                                                   printContents,
+                                                   actualParams())));
+
+        final List<Stmt> printContentsBody =
+            stmts(new VariableDeclarationStmt(new IntType(),
+                                              tempInt,
+                                              new MethodCallExp(new VariableExp(thisVar),
+                                                                cname,
+                                                                getInt,
+                                                                actualParams())),
+                  new VariableDeclarationStmt(new BoolType(),
+                                              tempBool,
+                                              new MethodCallExp(new VariableExp(thisVar),
+                                                                cname,
+                                                                getBool,
+                                                                actualParams())),
+                  new PrintStmt(tempInt),
+                  new PrintStmt(tempBool));
+
+        final ClassDefinition classDef =
+            new ClassDefinition(cname,
+                                new ClassName(ClassGenerator.objectName),
+                                bothFormalParams,
+                                new Constructor(bothFormalParams,
+                                                actualParams(),
+                                                constructorBody),
+                                new MainDefinition(mainBody),
+                                methods(new MethodDefinition(new IntType(),
+                                                             getInt,
+                                                             new ArrayList<FormalParam>(),
+                                                             stmts(),
+                                                             new GetExp(new VariableExp(thisVar),
+                                                                        cname,
+                                                                        theInt)),
+                                        new MethodDefinition(new BoolType(),
+                                                             getBool,
+                                                             new ArrayList<FormalParam>(),
+                                                             stmts(),
+                                                             new GetExp(new VariableExp(thisVar),
+                                                                        cname,
+                                                                        theBool)),
+                                        new MethodDefinition(new IntType(),
+                                                             setInt,
+                                                             setIntFormalParams,
+                                                             stmts(new PutStmt(new VariableExp(thisVar),
+                                                                               cname,
+                                                                               theInt,
+                                                                               new VariableExp(theInt))),
+                                                             new IntegerLiteralExp(0)),
+                                        new MethodDefinition(new IntType(),
+                                                             setBool,
+                                                             setBoolFormalParams,
+                                                             stmts(new PutStmt(new VariableExp(thisVar),
+                                                                               cname,
+                                                                               theBool,
+                                                                               new VariableExp(theBool))),
+                                                             new IntegerLiteralExp(0)),
+                                        new MethodDefinition(new IntType(),
+                                                             printContents,
+                                                             new ArrayList<FormalParam>(),
+                                                             printContentsBody,
+                                                             new IntegerLiteralExp(0))));
+        assertOutput(makeProgram(classDef),
+                     "1",
+                     "true",
+                     "1",
+                     "true",
+                     "5",
+                     "false");
+    } // testGettersSetters
+                                                
+    // TODO:
+    // -Constructors which do things
+    // -Methods that return objects
+    // -Multiple classes
+    // -Accessing instance variables
+    // -Assigning to instance variables
+    
 } // CodeGeneratorTest

@@ -144,6 +144,13 @@ public class ClassGenerator {
                               null, // signature (null means not generic)
                               forClass.extendsName.name, // superclass
                               new String[0]); // interfaces (none)
+            for (final FormalParam field : forClass.instanceVariables) {
+                classWriter.visitField(ACC_PUBLIC,
+                                       field.variable.name,
+                                       field.type.toDescriptorString(),
+                                       null,
+                                       null).visitEnd();
+            }
         } // SingleClassGenerator
 
         public void writeClass() throws CodeGeneratorException, IOException {
