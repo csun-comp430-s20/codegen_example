@@ -798,111 +798,140 @@ public class CodeGeneratorTest {
                      "3");
     } // testIntFunctionTakingParams
     
-    /*
     @Test
     public void testMutualRecursion() throws CodeGeneratorException, IOException {
-        // bool isEven(int x) {
-        //   bool result = false;
-        //   if (x == 0) {
-        //     result = true;
-        //   } else {
-        //     result = isOdd(x - 1);
+        // class Foo extends Object {
+        //   init() { super(); }
+        //   bool isEven(int x) {
+        //     bool result = false;
+        //     if (x == 0) {
+        //       result = true;
+        //     } else {
+        //       result = this[Foo].isOdd(x - 1);
+        //     }
+        //     return result;
         //   }
-        //   return result;
-        // }
         //
-        // bool isOdd(int x) {
-        //   bool result = false;
-        //   if (x == 0) {
-        //     result = false;
-        //   } else {
-        //     result = isEven(x - 1);
+        //   bool isOdd(int x) {
+        //     bool result = false;
+        //     if (x == 0) {
+        //       result = false;
+        //     } else {
+        //       result = this[Foo].isEven(x - 1);
+        //     }
+        //     return result;
         //   }
-        //   return result;
-        // }
         //
-        // bool evenYes = isEven(6);
-        // bool evenNo = isEven(7);
-        // bool oddYes = isOdd(9);
-        // bool oddNo = isOdd(10);
-        // print(evenYes);
-        // print(evenNo);
-        // print(oddYes);
-        // print(oddNo);
-        
+        //   main {
+        //     Foo f = new Foo();
+        //     bool evenYes = f[Foo].isEven(6);
+        //     bool evenNo = f[Foo].isEven(7);
+        //     bool oddYes = f[Foo].isOdd(9);
+        //     bool oddNo = f[Foo].isOdd(10);
+        //     print(evenYes);
+        //     print(evenNo);
+        //     print(oddYes);
+        //     print(oddNo);
+        //   }
+        // }
+
+        final ClassName cname = new ClassName("Foo");
+        final Variable f = new Variable("f");
         final List<FormalParam> formalParams = new ArrayList<FormalParam>();
         formalParams.add(new FormalParam(new IntType(), new Variable("x")));
         
         final Variable result = new Variable("result");
-        final Function isEven =
-            new Function(new BoolType(),
-                         new FunctionName("isEven"),
-                         formalParams,
-                         stmts(new VariableDeclarationStmt(new BoolType(),
-                                                           result,
-                                                           new BooleanLiteralExp(false)),
-                               new IfStmt(new BinopExp(new VariableExp(new Variable("x")),
-                                                       new EqualsBOP(),
-                                                       new IntegerLiteralExp(0)),
-                                          stmts(new AssignStmt(result,
-                                                               new BooleanLiteralExp(true))),
-                                          stmts(new AssignStmt(result,
-                                                               new FunctionCallExp(new FunctionName("isOdd"),
-                                                                                   actualParams(new BinopExp(new VariableExp(new Variable("x")),
-                                                                                                             new MinusBOP(),
-                                                                                                             new IntegerLiteralExp(1)))))))),
-                         new VariableExp(result));
-        final Function isOdd =
-            new Function(new BoolType(),
-                         new FunctionName("isOdd"),
-                         formalParams,
-                         stmts(new VariableDeclarationStmt(new BoolType(),
-                                                           result,
-                                                           new BooleanLiteralExp(false)),
-                               new IfStmt(new BinopExp(new VariableExp(new Variable("x")),
-                                                       new EqualsBOP(),
-                                                       new IntegerLiteralExp(0)),
-                                          stmts(new AssignStmt(result,
-                                                               new BooleanLiteralExp(false))),
-                                          stmts(new AssignStmt(result,
-                                                               new FunctionCallExp(new FunctionName("isEven"),
-                                                                                   actualParams(new BinopExp(new VariableExp(new Variable("x")),
-                                                                                                             new MinusBOP(),
-                                                                                                             new IntegerLiteralExp(1)))))))),
-                         new VariableExp(result));
+        final MethodDefinition isEven =
+            new MethodDefinition(new BoolType(),
+                                 new MethodName("isEven"),
+                                 formalParams,
+                                 stmts(new VariableDeclarationStmt(new BoolType(),
+                                                                   result,
+                                                                   new BooleanLiteralExp(false)),
+                                       new IfStmt(new BinopExp(new VariableExp(new Variable("x")),
+                                                               new EqualsBOP(),
+                                                               new IntegerLiteralExp(0)),
+                                                  stmts(new AssignStmt(result,
+                                                                       new BooleanLiteralExp(true))),
+                                                  stmts(new AssignStmt(result,
+                                                                       new MethodCallExp(new VariableExp(new Variable("this")),
+                                                                                         cname,
+                                                                                         new MethodName("isOdd"),
+                                                                                         actualParams(new BinopExp(new VariableExp(new Variable("x")),
+                                                                                                                   new MinusBOP(),
+                                                                                                                   new IntegerLiteralExp(1)))))))),
+                                 new VariableExp(result));
+        final MethodDefinition isOdd =
+            new MethodDefinition(new BoolType(),
+                                 new MethodName("isOdd"),
+                                 formalParams,
+                                 stmts(new VariableDeclarationStmt(new BoolType(),
+                                                                   result,
+                                                                   new BooleanLiteralExp(false)),
+                                       new IfStmt(new BinopExp(new VariableExp(new Variable("x")),
+                                                               new EqualsBOP(),
+                                                               new IntegerLiteralExp(0)),
+                                                  stmts(new AssignStmt(result,
+                                                                       new BooleanLiteralExp(false))),
+                                                  stmts(new AssignStmt(result,
+                                                                       new MethodCallExp(new VariableExp(new Variable("this")),
+                                                                                         cname,
+                                                                                         new MethodName("isEven"),
+                                                                                         actualParams(new BinopExp(new VariableExp(new Variable("x")),
+                                                                                                                   new MinusBOP(),
+                                                                                                                   new IntegerLiteralExp(1)))))))),
+                                 new VariableExp(result));
 
         final Variable evenYes = new Variable("evenYes");
         final Variable evenNo = new Variable("evenNo");
         final Variable oddYes = new Variable("oddYes");
         final Variable oddNo = new Variable("oddNo");
-        
-        final Program program =
-            makeProgramWithFunctions(functions(isEven, isOdd),
-                                     new VariableDeclarationStmt(new BoolType(),
-                                                                 evenYes,
-                                                                 new FunctionCallExp(new FunctionName("isEven"),
-                                                                                     actualParams(new IntegerLiteralExp(6)))),
-                                     new VariableDeclarationStmt(new BoolType(),
-                                                                 evenNo,
-                                                                 new FunctionCallExp(new FunctionName("isEven"),
-                                                                                     actualParams(new IntegerLiteralExp(7)))),
-                                     new VariableDeclarationStmt(new BoolType(),
-                                                                 oddYes,
-                                                                 new FunctionCallExp(new FunctionName("isOdd"),
-                                                                                     actualParams(new IntegerLiteralExp(9)))),
-                                     new VariableDeclarationStmt(new BoolType(),
-                                                                 oddNo,
-                                                                 new FunctionCallExp(new FunctionName("isOdd"),
-                                                                                     actualParams(new IntegerLiteralExp(10)))),
-                                     new PrintStmt(evenYes),
-                                     new PrintStmt(evenNo),
-                                     new PrintStmt(oddYes),
-                                     new PrintStmt(oddNo));
-        assertOutput(program,
+
+        final List<Stmt> mainBody =
+            stmts(new VariableDeclarationStmt(new ReferenceType(cname),
+                                              f,
+                                              new NewExp(cname, actualParams())),
+                  new VariableDeclarationStmt(new BoolType(),
+                                              evenYes,
+                                              new MethodCallExp(new VariableExp(f),
+                                                                cname,
+                                                                new MethodName("isEven"),
+                                                                actualParams(new IntegerLiteralExp(6)))),
+                  new VariableDeclarationStmt(new BoolType(),
+                                              evenNo,
+                                              new MethodCallExp(new VariableExp(f),
+                                                                cname,
+                                                                new MethodName("isEven"),
+                                                                actualParams(new IntegerLiteralExp(7)))),
+                  new VariableDeclarationStmt(new BoolType(),
+                                              oddYes,
+                                              new MethodCallExp(new VariableExp(f),
+                                                                cname,
+                                                                new MethodName("isOdd"),
+                                                                actualParams(new IntegerLiteralExp(9)))),
+                  new VariableDeclarationStmt(new BoolType(),
+                                              oddNo,
+                                              new MethodCallExp(new VariableExp(f),
+                                                                cname,
+                                                                new MethodName("isOdd"),
+                                                                actualParams(new IntegerLiteralExp(10)))),
+                  new PrintStmt(evenYes),
+                  new PrintStmt(evenNo),
+                  new PrintStmt(oddYes),
+                  new PrintStmt(oddNo));
+        final ClassDefinition classDef =
+            new ClassDefinition(cname,
+                                new ClassName(ClassGenerator.objectName),
+                                new ArrayList<FormalParam>(),
+                                new Constructor(new ArrayList<FormalParam>(),
+                                                new ArrayList<Exp>(),
+                                                stmts()),
+                                new MainDefinition(mainBody),
+                                methods(isEven, isOdd));
+        assertOutput(makeProgram(classDef),
                      "true",
                      "false",
                      "true",
                      "false");
-    }
-    */
+    } // testMutualRecursion
 } // CodeGeneratorTest
