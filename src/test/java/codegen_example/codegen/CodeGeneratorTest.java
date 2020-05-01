@@ -1107,12 +1107,116 @@ public class CodeGeneratorTest {
                      "5",
                      "false");
     } // testGettersSetters
-                                                
-    // TODO:
-    // -Constructors which do things
-    // -Methods that return objects
-    // -Multiple classes
-    // -Accessing instance variables
-    // -Assigning to instance variables
-    
+
+    @Test
+    public void testMultipleClasses() throws CodeGeneratorException, IOException {
+        // class List extends Object {
+        //   init() { super(); }
+        //   main {}
+        //   int length() { return -1; }
+        // }
+        // class Nil extends List {
+        //   init() { super(); }
+        //   main {}
+        //   int length() { return 0; }
+        // }
+        // class Cons extends List {
+        //   int head;
+        //   List tail;
+        //   init(int head, List tail) {
+        //     super();
+        //     this[Cons].head = head;
+        //     this[Cons].tail = tail;
+        //   }
+        //   int length() { return 1 + this[Cons].tail[List].length(); }
+        //   main {
+        //     List list = new Cons(-1, new Cons(-2, new Cons(-3, new Nil())));
+        //     int len = list[List].length();
+        //     print(len);
+        //   }
+        // }
+
+        final Variable thisVar = new Variable("this");
+
+        final ClassDefinition listDef =
+            new ClassDefinition(new ClassName("List"),
+                                new ClassName(ClassGenerator.objectName),
+                                new ArrayList<FormalParam>(),
+                                new Constructor(new ArrayList<FormalParam>(),
+                                                actualParams(),
+                                                stmts()),
+                                new MainDefinition(stmts()),
+                                methods(new MethodDefinition(new IntType(),
+                                                             new MethodName("length"),
+                                                             new ArrayList<FormalParam>(),
+                                                             stmts(),
+                                                             new IntegerLiteralExp(-1))));
+        final ClassDefinition nilDef =
+            new ClassDefinition(new ClassName("Nil"),
+                                new ClassName("List"),
+                                new ArrayList<FormalParam>(),
+                                new Constructor(new ArrayList<FormalParam>(),
+                                                actualParams(),
+                                                stmts()),
+                                new MainDefinition(stmts()),
+                                methods(new MethodDefinition(new IntType(),
+                                                             new MethodName("length"),
+                                                             new ArrayList<FormalParam>(),
+                                                             stmts(),
+                                                             new IntegerLiteralExp(0))));
+
+        final List<FormalParam> consConstructorFormalParams = new ArrayList<FormalParam>();
+        consConstructorFormalParams.add(new FormalParam(new IntType(), new Variable("head")));
+        consConstructorFormalParams.add(new FormalParam(new ReferenceType(new ClassName("List")),
+                                                        new Variable("tail")));
+
+        final List<Stmt> mainBody =
+            stmts(new VariableDeclarationStmt(new ReferenceType(new ClassName("List")),
+                                              new Variable("list"),
+                                              new NewExp(new ClassName("Cons"),
+                                                         actualParams(new IntegerLiteralExp(-1),
+                                                                      new NewExp(new ClassName("Cons"),
+                                                                                 actualParams(new IntegerLiteralExp(-2),
+                                                                                              new NewExp(new ClassName("Cons"),
+                                                                                                         actualParams(new IntegerLiteralExp(-3),
+                                                                                                                      new NewExp(new ClassName("Nil"),
+                                                                                                                                 actualParams())))))))),
+                  new VariableDeclarationStmt(new IntType(),
+                                              new Variable("len"),
+                                              new MethodCallExp(new VariableExp(new Variable("list")),
+                                                                new ClassName("List"),
+                                                                new MethodName("length"),
+                                                                actualParams())),
+                  new PrintStmt(new Variable("len")));
+
+        final ClassDefinition consDef =
+            new ClassDefinition(new ClassName("Cons"),
+                                new ClassName("List"),
+                                consConstructorFormalParams,
+                                new Constructor(consConstructorFormalParams,
+                                                actualParams(),
+                                                stmts(new PutStmt(new VariableExp(thisVar),
+                                                                  new ClassName("Cons"),
+                                                                  new Variable("head"),
+                                                                  new VariableExp(new Variable("head"))),
+                                                      new PutStmt(new VariableExp(thisVar),
+                                                                  new ClassName("Cons"),
+                                                                  new Variable("tail"),
+                                                                  new VariableExp(new Variable("tail"))))),
+                                new MainDefinition(mainBody),
+                                methods(new MethodDefinition(new IntType(),
+                                                             new MethodName("length"),
+                                                             new ArrayList<FormalParam>(),
+                                                             stmts(),
+                                                             new BinopExp(new IntegerLiteralExp(1),
+                                                                          new PlusBOP(),
+                                                                          new MethodCallExp(new GetExp(new VariableExp(thisVar),
+                                                                                                       new ClassName("Cons"),
+                                                                                                       new Variable("tail")),
+                                                                                            new ClassName("List"),
+                                                                                            new MethodName("length"),
+                                                                                            actualParams())))));
+        assertOutput(makeProgram(consDef, nilDef, listDef),
+                     "3");
+    } // testMultipleClasses
 } // CodeGeneratorTest
