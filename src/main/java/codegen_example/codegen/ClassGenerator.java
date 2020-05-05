@@ -74,10 +74,10 @@ public class ClassGenerator {
         return "(" + inner + ")V";
     } // printlnDescriptorString
     
-    public void writeClasses() throws CodeGeneratorException, IOException {
+    public void writeClasses(final String toDirectory) throws CodeGeneratorException, IOException {
         for (final ClassDefinition classDef : allClasses.values()) {
             final SingleClassGenerator genClass = new SingleClassGenerator(classDef);
-            genClass.writeClass();
+            genClass.writeClass(toDirectory);
         }
     } // writeClasses
     
@@ -153,7 +153,7 @@ public class ClassGenerator {
             }
         } // SingleClassGenerator
 
-        public void writeClass() throws CodeGeneratorException, IOException {
+        public void writeClass(final String toDirectory) throws CodeGeneratorException, IOException {
             SingleMethodGenerator methodGen = new SingleMethodGenerator(forClass.constructor);
             methodGen.writeMethod();
             methodGen = new SingleMethodGenerator(forClass.main);
@@ -165,7 +165,8 @@ public class ClassGenerator {
             classWriter.visitEnd();
 
             final BufferedOutputStream output =
-                new BufferedOutputStream(new FileOutputStream(new File(forClass.name.name + ".class")));
+                new BufferedOutputStream(new FileOutputStream(new File(toDirectory,
+                                                                       forClass.name.name + ".class")));
             output.write(classWriter.toByteArray());
             output.close();
         } // writeClass

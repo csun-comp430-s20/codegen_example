@@ -15,6 +15,10 @@ import java.util.ArrayList;
 import codegen_example.syntax.*;
 
 public class CodeGeneratorTest {
+    // ---BEGIN CONSTANTS---
+    public static final String WORK_DIRECTORY = "test_workspace";
+    // ---END CONSTANTS---
+    
     // each element of the array is a separate line
     public static String[] readUntilClose(final InputStream stream) throws IOException {
         return readUntilClose(new BufferedReader(new InputStreamReader(stream)));
@@ -40,10 +44,11 @@ public class CodeGeneratorTest {
         assert(!program.classDefs.isEmpty());
         
         final ClassGenerator generator = new ClassGenerator(program);
-        generator.writeClasses();
+        generator.writeClasses(WORK_DIRECTORY);
         
         final ProcessBuilder builder =
-            new ProcessBuilder("java", program.classDefs.get(0).name.name);
+            new ProcessBuilder("java", program.classDefs.get(0).name.name)
+            .directory(new File(WORK_DIRECTORY));
         builder.redirectErrorStream(true);
         final Process process = builder.start();
         try {
@@ -92,7 +97,7 @@ public class CodeGeneratorTest {
         assertArrayEquals(expectedOutput,
                           runTest(program));
         for (final ClassDefinition classDef : program.classDefs) {
-            new File(classDef.name.name + ".class").delete();
+            new File(WORK_DIRECTORY, classDef.name.name + ".class").delete();
         }
     } // assertOutput
 
