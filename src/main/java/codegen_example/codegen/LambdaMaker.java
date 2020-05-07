@@ -17,6 +17,7 @@ import codegen_example.syntax.*;
 
 public class LambdaMaker {
     // ---BEGIN CONSTANTS---
+    public static final String LAMBDA_PREFIX = "Lambda";
     public static final ClassName EXTENDS_NAME = new ClassName("Function1");
     public static final MethodName APPLY_NAME = new MethodName("apply");
     // ---END CONSTANTS---
@@ -102,6 +103,15 @@ public class LambdaMaker {
                              lambdaExp.body);
     } // freeVariables
 
+    public String constructorDescriptorFor(final ClassName name) throws CodeGeneratorException {
+        for (final LambdaDef lambdaDef : additionalClasses) {
+            if (lambdaDef.className.equals(name)) {
+                return lambdaDef.constructorDescriptorString();
+            }
+        }
+        throw new CodeGeneratorException("No such class: " + name);
+    } // constructorDescriptorFor
+    
     private List<Exp> translateLambdaBodies(final List<Exp> bodies,
                                             final Variable lambdaParam,
                                             final ReferenceType lambdaParamType,
@@ -276,7 +286,7 @@ public class LambdaMaker {
     public NewExp translateLambda(final LambdaExp lambdaExp,
                                   final VariableTable table)
         throws CodeGeneratorException {
-        final ClassName outputClassName = new ClassName("Lambda" + (curLambda++));
+        final ClassName outputClassName = new ClassName(LAMBDA_PREFIX + (curLambda++));
         final Set<Variable> needToCapture = LambdaMaker.freeVariables(lambdaExp);
         final List<FormalParam> instanceVariables = new ArrayList<FormalParam>();
 
@@ -311,4 +321,11 @@ public class LambdaMaker {
             writeLambda(lambdaDef, toDirectory);
         }
     } // writeLambdas
+
+    // intended for testing.  Deletes all created classes in the given directory
+    public void deleteClasses(final String inDirectory) {
+        for (final LambdaDef lambdaDef : additionalClasses) {
+            new File(inDirectory, lambdaDef.className.name + ".class").delete();
+        }
+    } // deleteClasses
 } // LambdaMaker

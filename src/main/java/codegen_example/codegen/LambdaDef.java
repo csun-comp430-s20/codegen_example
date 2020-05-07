@@ -65,6 +65,14 @@ public class LambdaDef {
                                     null,
                                     null);
         methodVisitor.visitCode();
+        // ---BEGIN CODE FOR SUPER---
+        methodVisitor.visitVarInsn(ALOAD, 0);
+        methodVisitor.visitMethodInsn(INVOKESPECIAL,
+                                      ClassGenerator.objectName,
+                                      "<init>",
+                                      "()V",
+                                      false);
+        // ---END CODE FOR SUPER---
         int variableIndex = 1;
         // this[cn].x = x
         for (final FormalParam instanceVariable : instanceVariables) {
@@ -121,5 +129,6 @@ public class LambdaDef {
                                       typedApplyDescriptorString(),
                                       false);
         methodVisitor.visitInsn(ARETURN);
+        methodVisitor.visitMaxs(0, 0);
     } // writeBridgeApply
 } // LambdaDef

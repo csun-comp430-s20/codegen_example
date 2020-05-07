@@ -39,7 +39,7 @@ public class CodeGeneratorTest {
     } // readUntilClose
 
     // Runs main in the first provided class
-    public String[] runTest(final Program program)
+    public TestResult runTest(final Program program)
         throws CodeGeneratorException, IOException {
         assert(!program.classDefs.isEmpty());
         
@@ -52,7 +52,8 @@ public class CodeGeneratorTest {
         builder.redirectErrorStream(true);
         final Process process = builder.start();
         try {
-            return readUntilClose(process.getInputStream());
+            return new TestResult(readUntilClose(process.getInputStream()),
+                                  generator);
         } finally {
             process.getErrorStream().close();
             process.getOutputStream().close();
@@ -94,11 +95,9 @@ public class CodeGeneratorTest {
     public void assertOutput(final Program program,
                              final String... expectedOutput)
         throws CodeGeneratorException, IOException {
-        assertArrayEquals(expectedOutput,
-                          runTest(program));
-        for (final ClassDefinition classDef : program.classDefs) {
-            new File(WORK_DIRECTORY, classDef.name.name + ".class").delete();
-        }
+        final TestResult testResult = runTest(program);
+        assertArrayEquals(expectedOutput, testResult.output);
+        testResult.generator.deleteClasses(WORK_DIRECTORY);
     } // assertOutput
 
     public void assertOutputInMain(final String className,
@@ -1224,4 +1223,60 @@ public class CodeGeneratorTest {
         assertOutput(makeProgram(consDef, nilDef, listDef),
                      "3");
     } // testMultipleClasses
+
+    @Test
+    public void testLambdaCreationCall() throws CodeGeneratorException, IOException {
+        // class Integer extends Object {
+        //   int value;
+        //   init(int value) {
+        //     super();
+        //     this[Integer].value = value;
+        //   }
+        //   main {
+        //     Integer i = new Integer(5);
+        //     (Integer => Integer) f = (Integer x) => [Integer]x;
+        //     int value = f[Integer](i)[Integer].value;
+        //     print(value);
+        //   }
+        // }
+        final ClassName integer = new ClassName("Integer");
+        final List<FormalParam> instanceVariables = new ArrayList<FormalParam>();
+        instanceVariables.add(new FormalParam(new IntType(), new Variable("value")));
+
+        final List<Stmt> main =
+            stmts(new VariableDeclarationStmt(new ReferenceType(integer),
+                                              new Variable("i"),
+                                              new NewExp(integer,
+                                                         actualParams(new IntegerLiteralExp(5)))),
+                  new VariableDeclarationStmt(new LambdaType(new ReferenceType(integer),
+                                                             new ReferenceType(integer)),
+                                              new Variable("f"),
+                                              new LambdaExp(new ReferenceType(integer),
+                                                            new Variable("x"),
+                                                            new ReferenceType(integer),
+                                                            new VariableExp(new Variable("x")))),
+                  new VariableDeclarationStmt(new IntType(),
+                                              new Variable("value"),
+                                              new GetExp(new LambdaCallExp(new VariableExp(new Variable("f")),
+                                                                           new ReferenceType(integer),
+                                                                           new VariableExp(new Variable("i"))),
+                                                         integer,
+                                                         new Variable("value"))),
+                  new PrintStmt(new Variable("value")));
+        
+        final ClassDefinition intDef =
+            new ClassDefinition(integer,
+                                new ClassName(ClassGenerator.objectName),
+                                instanceVariables,
+                                new Constructor(instanceVariables,
+                                                actualParams(),
+                                                stmts(new PutStmt(new VariableExp(new Variable("this")),
+                                                                  integer,
+                                                                  new Variable("value"),
+                                                                  new VariableExp(new Variable("value"))))),
+                                new MainDefinition(main),
+                                methods());
+        assertOutput(makeProgram(intDef),
+                     "5");
+    }
 } // CodeGeneratorTest

@@ -49,6 +49,8 @@ public class ExpressionStatementGenerator {
     public String constructorDescriptorFor(final ClassName name) throws CodeGeneratorException {
         if (name.name.equals(ClassGenerator.objectName)) {
             return "()V";
+        } else if (name.name.startsWith(LambdaMaker.LAMBDA_PREFIX)) {
+            return lambdaMaker.constructorDescriptorFor(name);
         } else {
             return classDefFor(name).constructor.toDescriptorString();
         }
@@ -220,7 +222,7 @@ public class ExpressionStatementGenerator {
     public void writeLambdaCallExp(final LambdaCallExp lambdaCallExp) throws CodeGeneratorException {
         writeExpression(lambdaCallExp.lambda);
         writeExpression(lambdaCallExp.param);
-        methodVisitor.visitMethodInsn(INVOKEVIRTUAL,
+        methodVisitor.visitMethodInsn(INVOKEINTERFACE,
                                       LambdaMaker.EXTENDS_NAME.name,
                                       LambdaMaker.APPLY_NAME.name,
                                       LambdaDef.bridgeApplyDescriptorString(),

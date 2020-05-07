@@ -93,6 +93,14 @@ public class ClassGenerator {
         }
         lambdaMaker.writeLambdas(toDirectory);
     } // writeClasses
+
+    // intended for testing.  Deletes all created classes in the given directory
+    public void deleteClasses(final String inDirectory) {
+        for (final ClassDefinition classDef : allClasses.values()) {
+            new File(inDirectory, classDef.name.name + ".class").delete();
+        }
+        lambdaMaker.deleteClasses(inDirectory);
+    } // deleteClasses
     
     private class SingleClassGenerator {
         // ---BEGIN INSTANCE VARIABLES---
