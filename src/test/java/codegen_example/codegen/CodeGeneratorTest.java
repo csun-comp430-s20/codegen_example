@@ -1344,5 +1344,80 @@ public class CodeGeneratorTest {
         assertOutput(makeProgram(intDef),
                      "6");
     } // testClosureCall
+
+    @Test
+    public void testNestedLambda() throws CodeGeneratorException, IOException {
+        // class Integer extends Object {
+        //   int value;
+        //   init(int value) {
+        //     super();
+        //     this[Integer].value = value;
+        //   }
+        //   main {
+        //     (Integer => (Integer => Integer)) f1 = (Integer x) => [(Integer => Integer)]((Integer y) => [Integer]new Integer(x[Integer].value + y[Integer].value));
+        //     (Integer => Integer) f2 = f1[(Integer => Integer)](new Integer(2));
+        //     int value = f2[Integer](new Integer(3))[Integer].value;
+        //     print(value);
+        //   }
+        // }
+        final ClassName integer = new ClassName("Integer");
+        final List<FormalParam> instanceVariables = new ArrayList<FormalParam>();
+        instanceVariables.add(new FormalParam(new IntType(), new Variable("value")));
+
+        final Exp innerLambdaBody =
+            new NewExp(integer,
+                       actualParams(new BinopExp(new GetExp(new VariableExp(new Variable("x")),
+                                                            integer,
+                                                            new Variable("value")),
+                                                 new PlusBOP(),
+                                                 new GetExp(new VariableExp(new Variable("y")),
+                                                            integer,
+                                                            new Variable("value")))));
+        final Exp outerLambdaBody =
+            new LambdaExp(new ReferenceType(integer),
+                          new Variable("y"),
+                          new LambdaType(new ReferenceType(integer), new ReferenceType(integer)),
+                          innerLambdaBody);
         
+        final List<Stmt> main =
+            stmts(new VariableDeclarationStmt(new ReferenceType(integer),
+                                              new Variable("i"),
+                                              new NewExp(integer,
+                                                         actualParams(new IntegerLiteralExp(5)))),
+                  new VariableDeclarationStmt(new LambdaType(new ReferenceType(integer),
+                                                             new LambdaType(new ReferenceType(integer), new ReferenceType(integer))),
+                                              new Variable("f1"),
+                                              new LambdaExp(new ReferenceType(integer),
+                                                            new Variable("x"),
+                                                            new LambdaType(new ReferenceType(integer), new ReferenceType(integer)),
+                                                            outerLambdaBody)),
+                  new VariableDeclarationStmt(new LambdaType(new ReferenceType(integer), new ReferenceType(integer)),
+                                              new Variable("f2"),
+                                              new LambdaCallExp(new VariableExp(new Variable("f1")),
+                                                                new LambdaType(new ReferenceType(integer), new ReferenceType(integer)),
+                                                                new NewExp(integer, actualParams(new IntegerLiteralExp(2))))),
+                  new VariableDeclarationStmt(new IntType(),
+                                              new Variable("value"),
+                                              new GetExp(new LambdaCallExp(new VariableExp(new Variable("f2")),
+                                                                           new ReferenceType(integer),
+                                                                           new NewExp(integer, actualParams(new IntegerLiteralExp(3)))),
+                                                         integer,
+                                                         new Variable("value"))),
+                  new PrintStmt(new Variable("value")));
+        
+        final ClassDefinition intDef =
+            new ClassDefinition(integer,
+                                new ClassName(ClassGenerator.objectName),
+                                instanceVariables,
+                                new Constructor(instanceVariables,
+                                                actualParams(),
+                                                stmts(new PutStmt(new VariableExp(new Variable("this")),
+                                                                  integer,
+                                                                  new Variable("value"),
+                                                                  new VariableExp(new Variable("value"))))),
+                                new MainDefinition(main),
+                                methods());
+        assertOutput(makeProgram(intDef),
+                     "5");
+    } // testNestedLambda
 } // CodeGeneratorTest
