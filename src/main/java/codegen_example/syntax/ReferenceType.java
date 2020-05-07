@@ -21,4 +21,8 @@ public class ReferenceType implements Type {
     public String toDescriptorString() {
         return "L" + refersTo.name + ";";
     }
+
+    public String toSignatureString() {
+        return toDescriptorString();
+    }
 } // ReferenceType

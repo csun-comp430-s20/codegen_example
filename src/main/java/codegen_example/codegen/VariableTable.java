@@ -8,6 +8,8 @@ import codegen_example.syntax.ReferenceType;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
 
 public class VariableTable {
     private final Map<Variable, VariableEntry> variables;
@@ -45,15 +47,34 @@ public class VariableTable {
         }
     } // getEntryFor
 
-    public static VariableTable withFormalParamsFrom(final ReferenceType thisType,
-                                                     final Callable callable)
+    public boolean hasEntryFor(final Variable variable) {
+        return variables.containsKey(variable);
+    } // hasEntryFor
+
+    public static VariableTable withFormalParam(final ReferenceType thisType,
+                                                final ReferenceType paramType,
+                                                final Variable param)
+        throws CodeGeneratorException {
+        final List<FormalParam> formalParams = new ArrayList<FormalParam>();
+        formalParams.add(new FormalParam(paramType, param));
+        return withFormalParams(thisType, formalParams);
+    } // withFormalParam
+    
+    public static VariableTable withFormalParams(final ReferenceType thisType,
+                                                 final List<FormalParam> formalParams)
         throws CodeGeneratorException {
         final VariableTable table = new VariableTable();
         table.addEntry(new Variable("this"), thisType);
-        for (final FormalParam formalParam : callable.formalParams) {
+        for (final FormalParam formalParam : formalParams) {
             table.addEntry(formalParam);
         }
         return table;
+    } // withFormalParams
+        
+    public static VariableTable withFormalParamsFrom(final ReferenceType thisType,
+                                                     final Callable callable)
+        throws CodeGeneratorException {
+        return withFormalParams(thisType, callable.formalParams);
     } // withFormalParamsFrom
 } // VariableTable
 

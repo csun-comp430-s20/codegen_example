@@ -18,7 +18,8 @@ public class Callable {
         this.returnType = returnType;
     }
 
-    public String toDescriptorString() {
+    public static String toDescriptorString(final List<FormalParam> formalParams,
+                                            final Type returnType) {
         final StringBuffer result = new StringBuffer();
         result.append("(");
         for (final FormalParam param : formalParams) {
@@ -27,5 +28,9 @@ public class Callable {
         result.append(")");
         result.append(returnType.toDescriptorString());
         return result.toString();
+    } // toDescriptorString
+    
+    public String toDescriptorString() {
+        return toDescriptorString(formalParams, returnType);
     } // toDescriptorString
 } // Callable

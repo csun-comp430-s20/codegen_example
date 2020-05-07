@@ -20,10 +20,12 @@ fp is a formal parameter
 cn is a class name
 c is a class
 p is a program
+rt is a reference type
 
-t ::= int | bool
+rt ::= rt1 => rt2 | cn
+t ::= int | bool | rt
 e ::= x | i | b | e1 op e2 | e[cn].mn(e*) | new cn(e*) |
-      e[cn].x
+      e[cn].x | (rt1 x) => [rt2]e | e1[rt](e2)
 op ::= + | - | / | * | < | ==
 s ::= t x = e; | x = e; | print(x); |
       if (e) { s* } else { s* } |
