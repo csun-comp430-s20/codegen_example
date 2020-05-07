@@ -75,6 +75,8 @@ public class ExpressionStatementGenerator {
                                      final Variable fieldName) throws CodeGeneratorException {
         if (className.name.equals(ClassGenerator.objectName)) {
             throw new CodeGeneratorException("Nonexistant field: " + fieldName.name);
+        } else if (className.name.startsWith(LambdaMaker.LAMBDA_PREFIX)) {
+            return lambdaMaker.fieldDescriptorFor(className, fieldName);
         } else {
             final ClassDefinition classDef = classDefFor(className);
             for (final FormalParam field : classDef.instanceVariables) {

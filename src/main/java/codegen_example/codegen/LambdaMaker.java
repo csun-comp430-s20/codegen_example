@@ -103,15 +103,24 @@ public class LambdaMaker {
                              lambdaExp.body);
     } // freeVariables
 
-    public String constructorDescriptorFor(final ClassName name) throws CodeGeneratorException {
+    public LambdaDef classDefinitionFor(final ClassName name) throws CodeGeneratorException {
         for (final LambdaDef lambdaDef : additionalClasses) {
             if (lambdaDef.className.equals(name)) {
-                return lambdaDef.constructorDescriptorString();
+                return lambdaDef;
             }
         }
         throw new CodeGeneratorException("No such class: " + name);
-    } // constructorDescriptorFor
+    } // classDefinitionFor
     
+    public String constructorDescriptorFor(final ClassName name) throws CodeGeneratorException {
+        return classDefinitionFor(name).constructorDescriptorString();
+    } // constructorDescriptorFor
+
+    public String fieldDescriptorFor(final ClassName className,
+                                     final Variable fieldName) throws CodeGeneratorException {
+        return classDefinitionFor(className).fieldDescriptorString(fieldName);
+    } // fieldDescriptorFor
+
     private List<Exp> translateLambdaBodies(final List<Exp> bodies,
                                             final Variable lambdaParam,
                                             final ReferenceType lambdaParamType,
@@ -147,6 +156,17 @@ public class LambdaMaker {
         } else if (body instanceof IntegerLiteralExp ||
                    body instanceof BooleanLiteralExp) {
             return body;
+        } else if (body instanceof BinopExp) {
+            final BinopExp asBinop = (BinopExp)body;
+            return new BinopExp(translateLambdaBody(asBinop.left,
+                                                    lambdaParam,
+                                                    lambdaParamType,
+                                                    lambdaClass),
+                                asBinop.bop,
+                                translateLambdaBody(asBinop.right,
+                                                    lambdaParam,
+                                                    lambdaParamType,
+                                                    lambdaClass));
         } else if (body instanceof MethodCallExp) {
             final MethodCallExp asMethodCall = (MethodCallExp)body;
             return new MethodCallExp(translateLambdaBody(asMethodCall.callOn,

@@ -45,6 +45,15 @@ public class LambdaDef {
                                            new VoidType());
     } // constructorDescriptorString
 
+    public String fieldDescriptorString(final Variable fieldName) throws CodeGeneratorException {
+        for (final FormalParam instanceVar : instanceVariables) {
+            if (instanceVar.variable.equals(fieldName)) {
+                return instanceVar.type.toDescriptorString();
+            }
+        }
+        throw new CodeGeneratorException("Unknown field: " + fieldName);
+    } // fieldDescriptorString
+        
     public String typedApplyDescriptorString() {
         return Callable.toDescriptorString(formalParams, returnType);
     } // typedApplyDescriptorString
