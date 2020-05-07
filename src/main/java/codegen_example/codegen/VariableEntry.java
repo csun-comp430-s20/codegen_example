@@ -26,27 +26,35 @@ public class VariableEntry {
         this.index = index;
     }
 
-    public void load(final MethodVisitor visitor) throws CodeGeneratorException {
+    public static int loadInstructionForType(final Type type) throws CodeGeneratorException {
         // both are treated as integers at the bytecode level
         if (type instanceof IntType ||
             type instanceof BoolType) {
-            visitor.visitVarInsn(ILOAD, index);
+            return ILOAD;
         } else if (type instanceof ReferenceType) {
-            visitor.visitVarInsn(ALOAD, index);
+            return ALOAD;
         } else {
             throw new CodeGeneratorException("Unknown load type: " + type);
         }
-    } // load
+    } // loadInstructionForType
 
-    public void store(final MethodVisitor visitor) throws CodeGeneratorException {
+    public static int storeInstructionForType(final Type type) throws CodeGeneratorException {
         // both are treated as integers at the bytecode level
         if (type instanceof IntType ||
             type instanceof BoolType) {
-            visitor.visitVarInsn(ISTORE, index);
+            return ISTORE;
         } else if (type instanceof ReferenceType) {
-            visitor.visitVarInsn(ASTORE, index);
+            return ASTORE;
         } else {
-            throw new CodeGeneratorException("Unknown store type: " + type);
+            throw new CodeGeneratorException("Unknown storetype: " + type);
         }
+    } // storeInstructionForType
+    
+    public void load(final MethodVisitor visitor) throws CodeGeneratorException {
+        visitor.visitVarInsn(loadInstructionForType(type), index);
+    } // load
+
+    public void store(final MethodVisitor visitor) throws CodeGeneratorException {
+        visitor.visitVarInsn(storeInstructionForType(type), index);
     } // store
 } // VariableEntry

@@ -20,6 +20,7 @@ public class LambdaMaker {
     public static final String LAMBDA_PREFIX = "Lambda";
     public static final ClassName EXTENDS_NAME = new ClassName("Function1");
     public static final MethodName APPLY_NAME = new MethodName("apply");
+    public static final Variable REWRITTEN_THIS = new Variable("~" + ClassGenerator.thisVariable.name);
     // ---END CONSTANTS---
 
     // ---BEGIN INSTANCE VARIABLES---
@@ -149,9 +150,11 @@ public class LambdaMaker {
                 return body;
             } else {
                 // captured in the lambda class
+                final Variable capturedVar =
+                    (theVar.equals(ClassGenerator.thisVariable)) ? REWRITTEN_THIS : theVar;
                 return new GetExp(new VariableExp(ClassGenerator.thisVariable),
                                   lambdaClass,
-                                  theVar);
+                                  capturedVar);
             }
         } else if (body instanceof IntegerLiteralExp ||
                    body instanceof BooleanLiteralExp) {
@@ -312,7 +315,9 @@ public class LambdaMaker {
 
         for (final Variable x : needToCapture) {
             final Type varType = table.getEntryFor(x).type;
-            instanceVariables.add(new FormalParam(varType, x));
+            final Variable varName =
+                (x.equals(ClassGenerator.thisVariable)) ? REWRITTEN_THIS : x;
+            instanceVariables.add(new FormalParam(varType, varName));
         }
 
         final LambdaDef lambdaDef =
@@ -329,10 +334,11 @@ public class LambdaMaker {
 
         final List<Exp> newParams = new ArrayList<Exp>();
         for (final FormalParam instanceVariable : instanceVariables) {
-            newParams.add(new VariableExp(instanceVariable.variable));
+            final Variable toPass =
+                (instanceVariable.variable.equals(REWRITTEN_THIS)) ? ClassGenerator.thisVariable : instanceVariable.variable;
+            newParams.add(new VariableExp(toPass));
         }
         
-        // TODO: if `this` is captured, this won't work right.  We need to rename `this`.
         return new NewExp(outputClassName, newParams);
     } // translateLambda
 

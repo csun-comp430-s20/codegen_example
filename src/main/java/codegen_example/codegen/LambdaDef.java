@@ -66,7 +66,7 @@ public class LambdaDef {
         return Callable.toDescriptorString(objectFormalParams, objectType);
     } // bridgeApplyDescriptorString
     
-    public void writeConstructor(final ClassWriter classWriter) {
+    public void writeConstructor(final ClassWriter classWriter) throws CodeGeneratorException {
         final MethodVisitor methodVisitor =
             classWriter.visitMethod(ACC_PUBLIC,
                                     "<init>",
@@ -86,7 +86,8 @@ public class LambdaDef {
         // this[cn].x = x
         for (final FormalParam instanceVariable : instanceVariables) {
             methodVisitor.visitVarInsn(ALOAD, 0);
-            methodVisitor.visitVarInsn(ALOAD, variableIndex++);
+            methodVisitor.visitVarInsn(VariableEntry.loadInstructionForType(instanceVariable.type),
+                                       variableIndex++);
             methodVisitor.visitFieldInsn(PUTFIELD,
                                          className.name,
                                          instanceVariable.variable.name,
